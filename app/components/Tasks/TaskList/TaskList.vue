@@ -1,10 +1,10 @@
 <template>
   <section class="task-list" aria-labelledby="task-list-heading">
     <header class="task-list__header">
-      <h2 id="task-list-heading" class="task-list__heading">Все задачи</h2>
+      <h2 id="task-list-heading" class="task-list__heading">{{ heading }}</h2>
       <p class="task-list__count">{{ completedCount }} из {{ items.length }} выполнено</p>
     </header>
-    <ul v-if="items.length" class="task-list__items" aria-label="Все задачи">
+    <ul v-if="items.length" class="task-list__items" :aria-label="heading">
       <TaskItem
         v-for="item in items"
         :key="item.id"
@@ -14,7 +14,7 @@
         @remove="emit('remove', $event)"
       />
     </ul>
-    <p v-else class="task-list__empty">Задач пока нет. Добавьте первую выше.</p>
+    <p v-else class="task-list__empty">На этот день задач нет.</p>
   </section>
 </template>
 
@@ -23,7 +23,7 @@ import { computed, nextTick } from 'vue';
 import TaskItem from '../TaskItem/TaskItem.vue';
 import type { Task } from '~/types/task';
 
-const props = defineProps<{ items: Task[] }>();
+const props = withDefaults(defineProps<{ items: Task[]; heading?: string }>(), { heading: 'На выбранный день' });
 const emit = defineEmits<{
   setCompleted: [id: string, completed: boolean];
   remove: [id: string];

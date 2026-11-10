@@ -14,7 +14,14 @@
         :class="{ 'todo-shell__sidebar--open': isCalendarOpen }"
         aria-label="Обзор задач и календарь"
       >
-        <TaskSidebar :task-count="taskStore.isReady ? taskStore.tasks.length : null" :date="activeDate" />
+        <TaskSidebar
+          :task-count="taskStore.isReady ? taskStore.tasks.length : null"
+          :date="activeDate"
+          :today="todayDate"
+          :task-dates="taskStore.isReady ? taskDates : []"
+          @select-date="selectDate"
+          @select="closeCalendar"
+        />
       </aside>
 
       <main class="todo-main">
@@ -43,7 +50,7 @@
           <div class="todo-heading">
             <div>
               <h1 class="todo-heading__title">Мои задачи</h1>
-              <p class="todo-heading__date">{{ dateLabel }}</p>
+              <p class="todo-heading__date" aria-live="polite" aria-atomic="true">{{ dateLabel }}</p>
             </div>
             <div class="todo-heading__actions">
               <button
@@ -78,7 +85,8 @@
             v-if="taskStore.isReady"
             ref="taskList"
             class="todo-main__list"
-            :items="taskStore.tasks"
+            :items="visibleTasks"
+            :heading="listHeading"
             @set-completed="taskStore.setCompleted"
             @remove="removeTask"
           />
@@ -102,16 +110,21 @@ import TaskSidebar from '~/components/Tasks/TaskSidebar/TaskSidebar.vue';
 import TaskStorageNotice from '~/components/Tasks/TaskStorageNotice/TaskStorageNotice.vue';
 import { useTaskStore } from '~/stores/taskStore';
 import { TASK_TITLE_MAX_LENGTH } from '~/types/task';
-import { getLocalDate, parseTaskDate } from '~/utils/taskDate';
+import { getLocalDate, isTaskDate, parseTaskDate } from '~/utils/taskDate';
+import { getNextVisibleTaskId, getTaskDates, getTasksForDate } from '~/utils/taskCalendar';
 
 const taskStore = useTaskStore();
 const activeDate = ref('');
+const todayDate = ref('');
 const formError = ref('');
 const isCalendarOpen = ref(false);
 const calendarButton = ref<HTMLButtonElement | null>(null);
 const taskForm = ref<InstanceType<typeof TaskForm> | null>(null);
 const taskList = ref<InstanceType<typeof TaskList> | null>(null);
 const storageNotice = ref<InstanceType<typeof TaskStorageNotice> | null>(null);
+const visibleTasks = computed(() => getTasksForDate(taskStore.tasks, activeDate.value));
+const taskDates = computed(() => getTaskDates(taskStore.tasks));
+const listHeading = computed(() => (activeDate.value === todayDate.value ? 'На сегодня' : 'На выбранный день'));
 
 const storageNote = computed(() => {
   if (taskStore.storageIssue) {
@@ -126,14 +139,37 @@ const dateLabel = computed(() => {
   const date = parseTaskDate(activeDate.value);
   if (!date) return 'Сегодня';
 
-  const label = date.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+  const today = parseTaskDate(todayDate.value);
+  const label = date.toLocaleDateString('ru-RU', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    ...(today && today.getFullYear() !== date.getFullYear() ? { year: 'numeric' } : {}),
+  });
   return label.charAt(0).toLocaleUpperCase('ru-RU') + label.slice(1);
 });
 
 onMounted(() => {
-  activeDate.value = getLocalDate();
+  refreshToday();
+  activeDate.value = todayDate.value;
   taskStore.initialize();
+  window.addEventListener('focus', refreshToday);
 });
+
+onBeforeUnmount(() => {
+  window.removeEventListener('focus', refreshToday);
+});
+
+function refreshToday() {
+  todayDate.value = getLocalDate();
+}
+
+function selectDate(date: string) {
+  if (!isTaskDate(date)) return;
+  refreshToday();
+  activeDate.value = date;
+  formError.value = '';
+}
 
 watch(
   () => taskStore.storageIssue,
@@ -177,13 +213,11 @@ function addTask(title: string) {
 }
 
 async function removeTask(id: string) {
-  const index = taskStore.tasks.findIndex((task) => task.id === id);
-  if (index === -1) return;
-
-  const focusTarget = taskStore.tasks[index + 1] ?? taskStore.tasks[index - 1];
+  if (!visibleTasks.value.some((task) => task.id === id)) return;
+  const focusTarget = getNextVisibleTaskId(visibleTasks.value, id);
   if (!taskStore.removeTask(id)) return;
 
-  if (focusTarget && (await taskList.value?.focusTask(focusTarget.id))) return;
+  if (focusTarget && (await taskList.value?.focusTask(focusTarget))) return;
   taskForm.value?.focus();
 }
 
