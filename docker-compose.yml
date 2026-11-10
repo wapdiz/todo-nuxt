@@ -1,0 +1,18 @@
+services:
+  todo-nuxt:
+    container_name: wapdiz-todo-1
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NITRO_HOST: 0.0.0.0
+      NITRO_PORT: 3000
+    networks:
+      - wapdiz_app-net
+
+networks:
+  wapdiz_app-net:
+    external: true
