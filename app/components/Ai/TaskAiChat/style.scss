@@ -123,16 +123,9 @@
   }
 
   &__orb {
-    position: relative;
-    margin-bottom: vc(20);
-    border-radius: 50%;
-    width: vc(120);
-    height: vc(120);
-    box-shadow: inset 0 vc(-14) vc(26) rgb(22 163 74 / 22%),
-      inset 0 vc(10) vc(22) rgb(255 255 255 / 90%),
-      0 vc(16) vc(36) rgb(56 189 148 / 18%);
-    background: radial-gradient(circle at 30% 28%, rgb(255 255 255 / 95%) 0%, rgb(255 255 255 / 0%) 52%),
-      radial-gradient(circle at 68% 68%, #bef264 0%, #86efac 36%, #99f6e4 68%, #e0f2fe 100%);
+    margin-bottom: vc(16);
+    width: vc(160);
+    height: vc(160);
   }
 
   &__welcome-title {
@@ -352,13 +345,6 @@
     }
   }
 
-  &__privacy {
-    margin-top: vc(7);
-    font-size: vc(10.5);
-    line-height: 1.35;
-    color: var(--todo-muted);
-  }
-
   &__quick {
     display: flex;
     flex: 0 0 auto;
@@ -528,9 +514,9 @@
     }
 
     &__orb {
-      margin-bottom: vc(10);
-      width: vc(48);
-      height: vc(48);
+      margin-bottom: vc(8);
+      width: vc(80);
+      height: vc(80);
     }
 
     &__welcome-title {
@@ -596,11 +582,6 @@
         width: vc(8);
         height: vc(8);
       }
-    }
-
-    &__privacy {
-      margin-top: vc(4);
-      font-size: vc(5.5);
     }
 
     &__picker {
@@ -702,9 +683,9 @@
     }
 
     &__orb {
-      margin-bottom: vc(14);
-      width: vc(92);
-      height: vc(92);
+      margin-bottom: vc(10);
+      width: vc(124);
+      height: vc(124);
     }
 
     &__welcome-title {
@@ -773,11 +754,6 @@
         width: vc(16);
         height: vc(16);
       }
-    }
-
-    &__privacy {
-      margin-top: vc(7);
-      font-size: vc(11);
     }
 
     &__picker {

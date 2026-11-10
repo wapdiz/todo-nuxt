@@ -22,7 +22,10 @@
 
       <div ref="threadRef" class="ai-chat__body">
         <div v-if="messages.length === 0 && !isPending" class="ai-chat__welcome">
-          <div class="ai-chat__orb" aria-hidden="true"></div>
+          <TaskAiOrb
+            class="ai-chat__orb"
+            :force-hover-state="isVoiceStarting || isVoiceRecording || isVoiceTranscribing"
+          />
           <p class="ai-chat__welcome-title">Чем помочь?</p>
           <p class="ai-chat__welcome-text">
             Создам задачи из обычного текста на нужную дату или разобью сложную задачу на понятные шаги.
@@ -105,7 +108,6 @@
           <TaskIcon name="arrow-up" />
         </button>
       </form>
-      <p class="ai-chat__privacy">Сообщения, задачи дня и аудиозаписи отправляются в n8n.</p>
     </div>
 
     <div class="ai-chat__quick">
@@ -158,6 +160,7 @@ import type { AiTranscribeResponse } from '#shared/types/aiTranscribe';
 import { AI_MAX_MESSAGE_LENGTH } from '#shared/utils/aiChat';
 import { mergeTranscribedDraft } from '#shared/utils/aiTranscribe';
 import { parseTaskDate } from '#shared/utils/taskDate';
+import TaskAiOrb from '../TaskAiOrb/TaskAiOrb.vue';
 import TaskAiProposalCard from '../TaskAiProposalCard/TaskAiProposalCard.vue';
 import TaskIcon from '~/components/Tasks/TaskIcon/TaskIcon.vue';
 import type { Task } from '~/types/task';
