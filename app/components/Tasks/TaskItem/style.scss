@@ -1,0 +1,134 @@
+.task-item {
+  --task-row-height: #{vc(58)};
+  --task-row-padding: #{vc(10)} #{vc(12)};
+  --task-row-gap: #{vc(12)};
+  --task-font-size: #{vc(14)};
+  --task-checkbox-size: #{vc(18)};
+  --task-icon-size: #{vc(16)};
+  --task-action-size: #{vc(36)};
+
+  display: flex;
+  align-items: center;
+  border-radius: vc(10);
+  padding: var(--task-row-padding);
+  min-width: 0;
+  min-height: var(--task-row-height);
+  color: var(--todo-text);
+  gap: var(--task-row-gap);
+
+  &__grip {
+    flex: 0 0 var(--task-icon-size);
+    width: var(--task-icon-size);
+    height: var(--task-icon-size);
+    color: #b9bdc4;
+  }
+
+  &__checkbox {
+    position: relative;
+    display: grid;
+    flex: 0 0 var(--task-checkbox-size);
+    place-items: center;
+    width: var(--task-checkbox-size);
+    height: var(--task-checkbox-size);
+  }
+
+  &__input {
+    appearance: none;
+    margin: 0;
+    border: 1px solid #c7cbd1;
+    border-radius: vc(5);
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    cursor: default;
+
+    &:checked {
+      border-color: var(--todo-accent);
+      background-color: var(--todo-accent);
+    }
+  }
+
+  &__check {
+    position: absolute;
+    width: 75%;
+    height: 75%;
+    color: #fff;
+    pointer-events: none;
+  }
+
+  &__title {
+    flex: 1;
+    overflow-wrap: anywhere;
+    min-width: 0;
+    font-size: var(--task-font-size);
+    line-height: 1.55;
+  }
+
+  &__delete {
+    display: grid;
+    flex: 0 0 var(--task-action-size);
+    place-items: center;
+    border-radius: vc(8);
+    padding: vc(8);
+    width: var(--task-action-size);
+    height: var(--task-action-size);
+    color: #9197a0;
+    background: transparent;
+    cursor: default;
+
+    :deep(svg) {
+      width: var(--task-icon-size);
+      height: var(--task-icon-size);
+    }
+  }
+
+  &--completed {
+    background-color: #f7f8f9;
+
+    .task-item__title {
+      text-decoration: line-through;
+      color: var(--todo-muted);
+      text-decoration-thickness: 1px;
+    }
+  }
+
+  @include tablet {
+    --task-row-height: #{vc(29)};
+    --task-row-padding: #{vc(5)} #{vc(6)};
+    --task-row-gap: #{vc(6)};
+    --task-font-size: #{vc(7)};
+    --task-checkbox-size: #{vc(9)};
+    --task-icon-size: #{vc(8)};
+    --task-action-size: #{vc(18)};
+
+    border-radius: vc(5);
+
+    &__input {
+      border-radius: vc(2.5);
+    }
+
+    &__delete {
+      padding: vc(4);
+    }
+  }
+
+  @include mobile {
+    --task-row-padding: #{vc(10)} #{vc(2)};
+    --task-row-gap: #{vc(10)};
+    --task-font-size: #{vc(14)};
+
+    align-items: flex-start;
+
+    &__grip {
+      display: none;
+    }
+
+    &__checkbox {
+      margin-top: vc(3);
+    }
+
+    &__delete {
+      margin-top: vc(-5);
+    }
+  }
+}

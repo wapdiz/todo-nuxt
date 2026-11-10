@@ -1,0 +1,62 @@
+.task-list {
+  --task-list-heading-size: #{vc(19)};
+  --task-list-caption-size: #{vc(12)};
+  --task-list-header-gap: #{vc(20)};
+
+  min-width: 0;
+
+  &__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: var(--task-list-header-gap);
+    gap: vc(12);
+  }
+
+  &__heading {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-weight: 400;
+    font-size: var(--task-list-heading-size);
+    line-height: 1.25;
+    color: var(--todo-text);
+  }
+
+  &__count {
+    flex-shrink: 0;
+    font-weight: 400;
+    font-size: var(--task-list-caption-size);
+    line-height: 1.4;
+    color: var(--todo-muted);
+  }
+
+  &__items {
+    display: flex;
+    flex-direction: column;
+    gap: vc(5);
+  }
+
+  &__empty {
+    padding: vc(32) 0;
+    font-size: var(--task-list-caption-size);
+    line-height: 1.5;
+    color: var(--todo-muted);
+  }
+
+  @include tablet {
+    --task-list-heading-size: #{vc(10)};
+    --task-list-caption-size: #{vc(6)};
+    --task-list-header-gap: #{vc(10)};
+
+    &__items {
+      gap: vc(3);
+    }
+  }
+
+  @include mobile {
+    &__header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: vc(6);
+    }
+  }
+}
