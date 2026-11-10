@@ -79,6 +79,16 @@ export function createAiChatHandler(deps: AiChatHandlerDeps) {
         });
       }
 
+      const quota = slot.reserveDailyQuota();
+      if (!quota.ok) {
+        setHeader(event, 'retry-after', quota.retryAfterSec);
+        throw createError({
+          statusCode: 429,
+          statusMessage: 'Too Many Requests',
+          message: quota.message,
+        });
+      }
+
       let upstreamResponse: Response;
       try {
         upstreamResponse = await fetchImpl(webhookUrl, {

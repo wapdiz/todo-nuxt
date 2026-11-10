@@ -74,6 +74,16 @@ export function createAiTranscribeHandler(deps: AiTranscribeHandlerDeps) {
         });
       }
 
+      const quota = slot.reserveDailyQuota();
+      if (!quota.ok) {
+        setHeader(event, 'retry-after', quota.retryAfterSec);
+        throw createError({
+          statusCode: 429,
+          statusMessage: 'Too Many Requests',
+          message: quota.message,
+        });
+      }
+
       const webhookBody: N8nTranscribeWebhookPayload = {
         action: 'transcribe',
         input_audio: {

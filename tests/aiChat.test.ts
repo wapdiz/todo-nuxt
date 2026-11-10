@@ -198,24 +198,44 @@ test('createAiGuard enforces concurrency, minute rate limit, UTC daily limit and
     now: () => clock,
   });
 
+  // acquire учитывает попытку и конкурентность, но не списывает дневной бюджет до reserveDailyQuota().
   const first = guard.acquire('1.1.1.1');
   assert.equal(first.ok, true);
+  assert.equal(guard.getStats().dailyCount, 0);
   const dupIp = guard.acquire('1.1.1.1');
   assert.equal(dupIp.ok, false);
   if (!dupIp.ok) assert.equal(dupIp.reason, 'concurrency');
-  if (first.ok) first.release();
+  if (first.ok) {
+    assert.deepEqual(first.reserveDailyQuota(), { ok: true });
+    assert.deepEqual(first.reserveDailyQuota(), { ok: true });
+    assert.equal(guard.getStats().dailyCount, 1);
+    first.release();
+  }
 
-  const second = guard.acquire('1.1.1.1');
-  assert.equal(second.ok, true);
-  if (second.ok) second.release();
+  // Отклоненный до upstream запрос (без reserveDailyQuota) не расходует дневной лимит.
+  const secondAttemptOnly = guard.acquire('1.1.1.1');
+  assert.equal(secondAttemptOnly.ok, true);
+  if (secondAttemptOnly.ok) secondAttemptOnly.release();
+  assert.equal(guard.getStats().dailyCount, 1);
 
   const thirdSameMinute = guard.acquire('1.1.1.1');
   assert.equal(thirdSameMinute.ok, false);
   if (!thirdSameMinute.ok) assert.equal(thirdSameMinute.reason, 'rate-limit');
 
-  const otherIp = guard.acquire('2.2.2.2');
-  assert.equal(otherIp.ok, true);
-  if (otherIp.ok) otherIp.release();
+  // Конкурентная гонка при остатке дневного бюджета в 1 слот: резервирует только первый, второй получает daily-limit.
+  const otherIpA = guard.acquire('2.2.2.2');
+  const otherIpB = guard.acquire('4.4.4.4');
+  assert.equal(otherIpA.ok, true);
+  assert.equal(otherIpB.ok, true);
+  if (otherIpA.ok) {
+    assert.deepEqual(otherIpA.reserveDailyQuota(), { ok: true });
+    otherIpA.release();
+  }
+  if (otherIpB.ok) {
+    assert.deepEqual(otherIpB.reserveDailyQuota(), { ok: true });
+    otherIpB.release();
+  }
+  assert.equal(guard.getStats().dailyCount, 3);
 
   clock += 30_000;
   const hitDaily = guard.acquire('3.3.3.3');
@@ -226,7 +246,37 @@ test('createAiGuard enforces concurrency, minute rate limit, UTC daily limit and
   clock += 35_000;
   const nextUtcDay = guard.acquire('3.3.3.3');
   assert.equal(nextUtcDay.ok, true);
-  if (nextUtcDay.ok) nextUtcDay.release();
+  if (nextUtcDay.ok) {
+    assert.deepEqual(nextUtcDay.reserveDailyQuota(), { ok: true });
+    nextUtcDay.release();
+  }
+});
+
+test('createAiGuard handles concurrent daily-limit race cleanly when reserving right before upstream', () => {
+  const guard = createAiGuard({
+    rateLimitPerMinute: 5,
+    dailyLimit: 1,
+    maxConcurrentPerIp: 1,
+    maxConcurrentGlobal: 2,
+  });
+
+  const slotA = guard.acquire('10.0.0.1');
+  const slotB = guard.acquire('10.0.0.2');
+  assert.equal(slotA.ok, true);
+  assert.equal(slotB.ok, true);
+
+  if (slotA.ok) {
+    assert.deepEqual(slotA.reserveDailyQuota(), { ok: true });
+    slotA.release();
+  }
+  if (slotB.ok) {
+    const res = slotB.reserveDailyQuota();
+    assert.equal(res.ok, false);
+    if (!res.ok) assert.equal(res.reason, 'daily-limit');
+    slotB.release();
+  }
+  assert.equal(guard.getStats().dailyCount, 1);
+  assert.equal(guard.getStats().globalInFlight, 0);
 });
 
 test('readBoundedNodeBody aborts oversized streams early, detaches listeners and handles extra chunks safely', async () => {
@@ -376,6 +426,102 @@ test('HTTP integration: chunked payload > limit rejects with 413, survives extra
   }
 });
 
+test('HTTP integration: invalid 400 requests are rate-limited per IP without exhausting shared daily upstream quota', async () => {
+  let upstreamCalls = 0;
+  const guard = createAiGuard({
+    rateLimitPerMinute: 4,
+    dailyLimit: 2,
+    maxConcurrentPerIp: 1,
+    maxConcurrentGlobal: 2,
+  });
+
+  const sharedConfig = {
+    n8nWebhookUrl: 'https://n8n.example.test/webhook/todo-ai-chat',
+    n8nAuthHeaderName: 'X-Todo-Ai-Token',
+    n8nAuthHeaderValue: 'secret-token',
+    aiTrustProxy: true,
+    aiRateLimitPerMinute: 4,
+    aiDailyRequestLimit: 2,
+    aiMaxConcurrentPerIp: 1,
+    aiMaxConcurrentGlobal: 2,
+  };
+
+  const app = createApp();
+  app.use(
+    '/api/ai-chat',
+    createAiChatHandler({
+      guard,
+      getConfig: () => sharedConfig,
+      fetchImpl: async () => {
+        upstreamCalls += 1;
+        return new Response(JSON.stringify({ reply: 'Готово', proposals: [] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      },
+    }),
+  );
+
+  const server = http.createServer(toNodeListener(app));
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+
+  try {
+    const port = getPort(server);
+
+    // Атакующий шлет 4 невалидных {} и исчерпывает только свой минутный IP-лимит, но не общий дневной бюджет.
+    for (let i = 0; i < 4; i++) {
+      const badRes = await fetch(`http://127.0.0.1:${port}/api/ai-chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Forwarded-For': '198.51.100.10' },
+        body: '{}',
+      });
+      assert.equal(badRes.status, 400);
+    }
+
+    const throttledAttacker = await fetch(`http://127.0.0.1:${port}/api/ai-chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Forwarded-For': '198.51.100.10' },
+      body: '{}',
+    });
+    assert.equal(throttledAttacker.status, 429);
+    assert.equal(upstreamCalls, 0);
+    assert.equal(guard.getStats().dailyCount, 0);
+    assert.equal(guard.getStats().globalInFlight, 0);
+
+    // Первый валидный запрос с другого IP проходит; два одновременных на последний слот не перерасходуют бюджет.
+    const firstValid = await fetch(`http://127.0.0.1:${port}/api/ai-chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Forwarded-For': '203.0.113.20' },
+      body: JSON.stringify(makeValidRequest({ message: 'План на день', tasks: [], history: [] })),
+    });
+    assert.equal(firstValid.status, 200);
+    assert.equal(guard.getStats().dailyCount, 1);
+
+    const [raceA, raceB] = await Promise.all([
+      fetch(`http://127.0.0.1:${port}/api/ai-chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Forwarded-For': '203.0.113.21' },
+        body: JSON.stringify(makeValidRequest({ message: 'Гонка 1', tasks: [], history: [] })),
+      }),
+      fetch(`http://127.0.0.1:${port}/api/ai-chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Forwarded-For': '203.0.113.22' },
+        body: JSON.stringify(makeValidRequest({ message: 'Гонка 2', tasks: [], history: [] })),
+      }),
+    ]);
+
+    const raceStatuses = [raceA.status, raceB.status].sort((a, b) => a - b);
+    assert.deepEqual(raceStatuses, [200, 429]);
+    const rejectedRace = raceA.status === 429 ? raceA : raceB;
+    assert.ok(rejectedRace.headers.get('retry-after'));
+    assert.equal(upstreamCalls, 2);
+    assert.equal(guard.getStats().dailyCount, 2);
+    assert.equal(guard.getStats().globalInFlight, 0);
+  } finally {
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+  }
+});
+
 test('readBoundedJsonBody releases guard on slow stalled stream timeout inside h3', async () => {
   const guard = createAiGuard({
     rateLimitPerMinute: 12,
@@ -421,6 +567,7 @@ test('readBoundedJsonBody releases guard on slow stalled stream timeout inside h
 
     assert.equal(status, 408);
     assert.equal(guard.getStats().globalInFlight, 0);
+    assert.equal(guard.getStats().dailyCount, 0);
   } finally {
     await new Promise<void>((resolve) => server.close(() => resolve()));
   }
