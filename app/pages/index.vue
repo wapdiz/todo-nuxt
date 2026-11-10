@@ -29,6 +29,8 @@
       </aside>
 
       <main class="todo-main" :inert="drawerA11y.mainInert">
+        <div class="todo-main__aura" aria-hidden="true"></div>
+
         <div class="todo-mobile-bar">
           <button
             ref="calendarButton"
@@ -55,7 +57,6 @@
         </div>
 
         <header class="todo-main__hero">
-          <div class="todo-main__aura" aria-hidden="true"></div>
           <div class="todo-heading">
             <div>
               <h1 class="todo-heading__title">{{ greetingText }}</h1>

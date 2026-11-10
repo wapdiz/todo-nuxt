@@ -134,9 +134,12 @@
     }
 
     &__menu {
+      left: 0;
+      right: auto;
       border-radius: vc(12);
       padding: vc(5);
       min-width: vc(160);
+      max-width: calc(100vw - #{vc(56)});
     }
 
     &__option {

@@ -113,22 +113,6 @@
     color: var(--todo-muted);
   }
 
-  &__local {
-    display: flex;
-    align-items: center;
-    margin-top: auto;
-    padding-top: vc(40);
-    font-size: vc(11);
-    line-height: 1.4;
-    color: var(--todo-muted);
-    gap: vc(8);
-
-    :deep(svg) {
-      width: vc(15);
-      height: vc(15);
-    }
-  }
-
   @include tablet {
     --sidebar-padding: #{vc(12)};
     --sidebar-label-size: #{vc(6)};
@@ -168,17 +152,6 @@
       font-size: vc(6.5);
       gap: vc(5);
     }
-
-    &__local {
-      padding-top: vc(20);
-      font-size: vc(5.5);
-      gap: vc(4);
-
-      :deep(svg) {
-        width: vc(7.5);
-        height: vc(7.5);
-      }
-    }
   }
 
   @include mobile {
@@ -199,8 +172,7 @@
       min-height: vc(366);
     }
 
-    &__overview,
-    &__local {
+    &__overview {
       display: none;
     }
   }

@@ -43,11 +43,6 @@
         </span>
       </div>
     </section>
-
-    <div class="task-sidebar__local">
-      <TaskIcon name="calendar" />
-      <span>На этом устройстве</span>
-    </div>
   </div>
 </template>
 

@@ -97,13 +97,13 @@
       position: fixed;
       right: vc(12);
       top: vc(12);
-      bottom: vc(12);
       z-index: 5;
       display: none;
       overflow: hidden;
       border: 1px solid var(--todo-line);
       border-radius: vc(14);
       width: vc(220);
+      height: min(#{vc(340)}, calc(100svh - #{vc(24)}));
       box-shadow: 0 vc(12) vc(40) rgb(22 36 28 / 18%);
 
       &--open {
@@ -188,6 +188,8 @@
 }
 
 .todo-mobile-bar {
+  position: relative;
+  z-index: 1;
   display: none;
 
   &__btn {
@@ -272,8 +274,8 @@
 
   &__hero {
     position: relative;
-    margin: vc(-28) vc(-38) 0;
-    padding: vc(30) vc(38) vc(22);
+    z-index: 2;
+    padding: vc(2) 0 vc(22);
   }
 
   &__aura {
@@ -281,6 +283,7 @@
     left: 0;
     right: 0;
     top: 0;
+    z-index: 0;
     height: vc(180);
     background: radial-gradient(ellipse 65% 80% at 52% -10%, rgb(134 239 172 / 34%) 0%, rgb(134 239 172 / 0%) 72%),
       radial-gradient(ellipse 48% 70% at 84% 5%, rgb(165 243 252 / 26%) 0%, rgb(165 243 252 / 0%) 72%);
@@ -289,6 +292,7 @@
 
   &__content {
     position: relative;
+    z-index: 1;
     margin: vc(10) auto vc(40);
     width: 100%;
     max-width: vc(760);
@@ -340,12 +344,11 @@
     padding: vc(12) vc(16);
 
     &__hero {
-      margin: vc(-12) vc(-16) 0;
-      padding: vc(12) vc(16);
+      padding: 0 0 vc(12);
     }
 
     &__aura {
-      height: vc(90);
+      height: vc(120);
     }
 
     &__content {
