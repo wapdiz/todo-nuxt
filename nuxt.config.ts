@@ -39,7 +39,7 @@ export default defineNuxtConfig({
   },
   devServer: {
     port: 3000,
-    host: 'http://localhost:3000/',
+    host: '127.0.0.1',
   },
   app: {
     baseURL: baseURL,
