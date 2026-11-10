@@ -33,6 +33,14 @@
     display: flex;
     flex-direction: column;
     gap: vc(5);
+
+    &--reordering {
+      @media (prefers-reduced-motion: no-preference) {
+        :deep(.task-list-move) {
+          transition: transform 0.18s cubic-bezier(0.2, 0, 0, 1);
+        }
+      }
+    }
   }
 
   &__empty {
@@ -40,6 +48,19 @@
     font-size: var(--task-list-caption-size);
     line-height: 1.5;
     color: var(--todo-muted);
+  }
+
+  &__floating {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 40;
+    pointer-events: none;
+  }
+
+  &--dragging {
+    cursor: grabbing;
+    user-select: none;
   }
 
   @include tablet {

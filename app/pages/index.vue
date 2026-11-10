@@ -89,6 +89,7 @@
             :heading="listHeading"
             @set-completed="taskStore.setCompleted"
             @remove="removeTask"
+            @reorder="reorderTasks"
           />
           <p v-else-if="!taskStore.storageIssue" class="todo-main__loading" role="status">Загружаем задачи…</p>
         </div>
@@ -219,6 +220,11 @@ async function removeTask(id: string) {
 
   if (focusTarget && (await taskList.value?.focusTask(focusTarget))) return;
   taskForm.value?.focus();
+}
+
+function reorderTasks(orderedIds: string[]) {
+  if (!activeDate.value) return;
+  taskStore.reorderTasks(activeDate.value, orderedIds);
 }
 
 function closeCalendar() {

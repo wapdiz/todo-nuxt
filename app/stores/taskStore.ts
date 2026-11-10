@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { TASK_TITLE_MAX_LENGTH, type Task } from '../types/task';
+import { reorderTasksForDate } from '../utils/taskCalendar';
 import { isTaskDate } from '../utils/taskDate';
 import { createTaskStorage, type TaskStorage, type TaskStorageIssue } from '../utils/taskStorage';
 
@@ -81,6 +82,14 @@ export const useTaskStore = defineStore('tasks', () => {
     return commit(tasks.value.filter((item) => item.id !== id));
   }
 
+  function reorderTasks(scheduledDate: string, orderedIds: readonly string[]): boolean {
+    if (!canMutate()) return false;
+    const candidate = reorderTasksForDate(tasks.value, scheduledDate, orderedIds);
+    if (!candidate) return false;
+    if (candidate.every((task, index) => task === tasks.value[index])) return true;
+    return commit(candidate);
+  }
+
   function resetStorage(): boolean {
     if (!storagePort) {
       storageIssue.value = 'not-initialized';
@@ -99,5 +108,5 @@ export const useTaskStore = defineStore('tasks', () => {
     return true;
   }
 
-  return { tasks, isReady, storageIssue, initialize, addTask, setCompleted, removeTask, resetStorage };
+  return { tasks, isReady, storageIssue, initialize, addTask, setCompleted, removeTask, reorderTasks, resetStorage };
 });

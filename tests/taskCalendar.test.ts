@@ -1,7 +1,14 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { Task } from '../app/types/task';
-import { getNextVisibleTaskId, getTaskDates, getTasksForDate } from '../app/utils/taskCalendar';
+import {
+  getNextVisibleTaskId,
+  getTaskDates,
+  getTasksForDate,
+  moveTaskId,
+  reorderTasksForDate,
+  updateDragOrder,
+} from '../app/utils/taskCalendar';
 import { getLocalDate, parseTaskDate } from '../app/utils/taskDate';
 
 function task(id: string, scheduledDate: string, completed = false): Task {
@@ -108,4 +115,89 @@ test('local dates distinguish leap February from a non-leap February', () => {
   ordinary.setDate(ordinary.getDate() + 1);
   assert.equal(getLocalDate(ordinary), '2026-03-01');
   assert.equal(parseTaskDate('2026-02-29'), null);
+});
+
+test('reorders tasks for a single date without moving tasks from other dates', () => {
+  const tasks = Object.freeze([
+    Object.freeze(task('future', '2026-11-12')),
+    Object.freeze(task('a', '2026-11-11', true)),
+    Object.freeze(task('past', '2026-11-10')),
+    Object.freeze(task('b', '2026-11-11')),
+    Object.freeze(task('c', '2026-11-11')),
+  ]);
+
+  const reordered = reorderTasksForDate(tasks, '2026-11-11', ['c', 'a', 'b']);
+  assert.ok(reordered);
+  assert.deepEqual(
+    reordered.map((item) => item.id),
+    ['future', 'c', 'past', 'a', 'b'],
+  );
+  assert.deepEqual(
+    getTasksForDate(reordered, '2026-11-11').map((item) => item.id),
+    ['c', 'a', 'b'],
+  );
+  assert.equal(reordered[1]?.completed, false);
+  assert.equal(reordered[3]?.completed, true);
+  assert.deepEqual(
+    tasks.map((item) => item.id),
+    ['future', 'a', 'past', 'b', 'c'],
+  );
+});
+
+test('rejects invalid dates, incomplete lists, duplicates and foreign ids when reordering', () => {
+  const tasks = [task('a', '2026-11-11'), task('b', '2026-11-11'), task('other', '2026-11-12')];
+
+  assert.equal(reorderTasksForDate(tasks, '2026-02-29', ['a', 'b']), null);
+  assert.equal(reorderTasksForDate(tasks, '2026-11-11', ['a']), null);
+  assert.equal(reorderTasksForDate(tasks, '2026-11-11', ['a', 'a']), null);
+  assert.equal(reorderTasksForDate(tasks, '2026-11-11', ['a', 'other']), null);
+  assert.equal(reorderTasksForDate(tasks, '2026-11-11', ['a', 'b', 'other']), null);
+  assert.deepEqual(
+    reorderTasksForDate(tasks, '2026-11-10', [])?.map((item) => item.id),
+    ['a', 'b', 'other'],
+  );
+});
+
+test('moves a task id one slot at a time within list boundaries', () => {
+  const ids = Object.freeze(['a', 'b', 'c']);
+  assert.deepEqual(moveTaskId(ids, 'b', -1), ['b', 'a', 'c']);
+  assert.deepEqual(moveTaskId(ids, 'b', 1), ['a', 'c', 'b']);
+  assert.equal(moveTaskId(ids, 'a', -1), null);
+  assert.equal(moveTaskId(ids, 'c', 1), null);
+  assert.equal(moveTaskId(ids, 'missing', 1), null);
+  assert.deepEqual(ids, ['a', 'b', 'c']);
+});
+
+test('updates drag order smoothly across unequal heights and multi-slot jumps', () => {
+  const slots = [
+    { id: 'short-top', height: 58 },
+    { id: 'tall-middle', height: 140 },
+    { id: 'short-bottom', height: 58 },
+  ];
+
+  const movedDownPastTall = updateDragOrder(slots, 'short-top', 80, 5);
+  assert.deepEqual(
+    movedDownPastTall.map((slot) => slot.id),
+    ['tall-middle', 'short-top', 'short-bottom'],
+  );
+  assert.deepEqual(
+    updateDragOrder(movedDownPastTall, 'short-top', 80, 5).map((slot) => slot.id),
+    ['tall-middle', 'short-top', 'short-bottom'],
+  );
+
+  const jumpedToBottom = updateDragOrder(slots, 'short-top', 220, 5);
+  assert.deepEqual(
+    jumpedToBottom.map((slot) => slot.id),
+    ['tall-middle', 'short-bottom', 'short-top'],
+  );
+
+  const tallMovedUp = updateDragOrder(slots, 'tall-middle', 20, 5);
+  assert.deepEqual(
+    tallMovedUp.map((slot) => slot.id),
+    ['tall-middle', 'short-top', 'short-bottom'],
+  );
+  assert.deepEqual(
+    updateDragOrder(tallMovedUp, 'tall-middle', 20, 5).map((slot) => slot.id),
+    ['tall-middle', 'short-top', 'short-bottom'],
+  );
 });

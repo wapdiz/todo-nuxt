@@ -198,6 +198,7 @@ test('blocks mutations and UUID generation before initialization', (context) => 
   assert.equal(store.addTask('Задача', '2026-11-11'), null);
   assert.equal(store.setCompleted('missing', true), false);
   assert.equal(store.removeTask('missing'), false);
+  assert.equal(store.reorderTasks('2026-11-11', []), false);
   assert.equal(store.resetStorage(), false);
   assert.equal(store.storageIssue, 'not-initialized');
   assert.deepEqual(store.tasks, []);
@@ -369,4 +370,76 @@ test('failed reset preserves the last saved list and its readiness unless a conf
   assert.deepEqual(store.tasks, []);
   assert.equal(store.isReady, true);
   assert.equal(store.storageIssue, null);
+});
+
+test('reorders tasks for a date, persists the order and keeps new tasks on top', () => {
+  const store = useTaskStore();
+  const memory = createMemoryStorage();
+  store.initialize(memory.port);
+
+  const first = store.addTask('Первая', '2026-11-11');
+  const otherDay = store.addTask('Другой день', '2026-11-12');
+  const second = store.addTask('Вторая', '2026-11-11');
+  const third = store.addTask('Третья', '2026-11-11');
+  assert.ok(first && otherDay && second && third);
+
+  assert.equal(store.reorderTasks('2026-11-11', [first.id, third.id, second.id]), true);
+  assert.deepEqual(
+    store.tasks.map((task) => task.id),
+    [first.id, third.id, otherDay.id, second.id],
+  );
+  assert.deepEqual(
+    memory.state.tasks.map((task) => task.id),
+    [first.id, third.id, otherDay.id, second.id],
+  );
+
+  const reloaded = useTaskStore(createPinia());
+  assert.equal(reloaded.initialize(memory.port), true);
+  assert.deepEqual(
+    reloaded.tasks.map((task) => task.id),
+    [first.id, third.id, otherDay.id, second.id],
+  );
+
+  const newest = store.addTask('Самая новая', '2026-11-11');
+  assert.ok(newest);
+  assert.equal(store.tasks[0]?.id, newest.id);
+});
+
+test('no-op and invalid reorders do not write or clear earlier storage errors', () => {
+  const store = useTaskStore();
+  const memory = createMemoryStorage([savedTask('newest'), savedTask('oldest')]);
+  store.initialize(memory.port);
+  memory.state.saveIssue = 'quota-exceeded';
+  assert.equal(store.addTask('Ошибка', '2026-11-11'), null);
+  const previousCalls = memory.state.saveCalls;
+
+  assert.equal(store.reorderTasks('2026-11-11', ['newest', 'oldest']), true);
+  assert.equal(store.reorderTasks('2026-11-11', ['newest']), false);
+  assert.equal(store.reorderTasks('2026-11-11', ['newest', 'missing']), false);
+  assert.equal(memory.state.saveCalls, previousCalls);
+  assert.equal(store.storageIssue, 'quota-exceeded');
+});
+
+test('failed reorder writes leave task order unchanged and surface storage issues', () => {
+  const store = useTaskStore();
+  const memory = createMemoryStorage([savedTask('first'), savedTask('second')]);
+  store.initialize(memory.port);
+
+  memory.state.saveIssue = 'quota-exceeded';
+  assert.equal(store.reorderTasks('2026-11-11', ['second', 'first']), false);
+  assert.deepEqual(
+    store.tasks.map((task) => task.id),
+    ['first', 'second'],
+  );
+  assert.equal(store.storageIssue, 'quota-exceeded');
+  assert.equal(store.isReady, true);
+
+  memory.state.saveIssue = 'conflict';
+  assert.equal(store.reorderTasks('2026-11-11', ['second', 'first']), false);
+  assert.deepEqual(
+    store.tasks.map((task) => task.id),
+    ['first', 'second'],
+  );
+  assert.equal(store.storageIssue, 'conflict');
+  assert.equal(store.isReady, false);
 });
