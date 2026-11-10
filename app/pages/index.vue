@@ -14,7 +14,7 @@
         :class="{ 'todo-shell__sidebar--open': isCalendarOpen }"
         aria-label="Обзор задач и календарь"
       >
-        <TaskSidebar :task-count="taskStore.tasks.length" :date="activeDate" />
+        <TaskSidebar :task-count="taskStore.isReady ? taskStore.tasks.length : null" :date="activeDate" />
       </aside>
 
       <main class="todo-main">
@@ -50,6 +50,7 @@
                 class="todo-heading__add"
                 type="button"
                 aria-label="Перейти к полю новой задачи"
+                :disabled="!taskStore.isReady"
                 @click="taskForm?.focus()"
               >
                 <TaskIcon name="plus" />
@@ -57,14 +58,31 @@
             </div>
           </div>
 
-          <TaskForm ref="taskForm" :error="formError" :disabled="!activeDate" @add="addTask" />
+          <TaskForm
+            ref="taskForm"
+            :error="formError"
+            :note="storageNote"
+            :disabled="!activeDate || !taskStore.isReady"
+            @add="addTask"
+          />
+          <TaskStorageNotice
+            v-if="taskStore.storageIssue"
+            ref="storageNotice"
+            class="todo-main__storage"
+            :issue="taskStore.storageIssue"
+            :loaded="taskStore.isReady"
+            @retry="retryLoad"
+            @reset="resetStorage"
+          />
           <TaskList
+            v-if="taskStore.isReady"
             ref="taskList"
             class="todo-main__list"
             :items="taskStore.tasks"
             @set-completed="taskStore.setCompleted"
             @remove="removeTask"
           />
+          <p v-else-if="!taskStore.storageIssue" class="todo-main__loading" role="status">Загружаем задачи…</p>
         </div>
 
         <footer class="todo-main__footer">
@@ -81,6 +99,7 @@ import TaskForm from '~/components/Tasks/TaskForm/TaskForm.vue';
 import TaskIcon from '~/components/Tasks/TaskIcon/TaskIcon.vue';
 import TaskList from '~/components/Tasks/TaskList/TaskList.vue';
 import TaskSidebar from '~/components/Tasks/TaskSidebar/TaskSidebar.vue';
+import TaskStorageNotice from '~/components/Tasks/TaskStorageNotice/TaskStorageNotice.vue';
 import { useTaskStore } from '~/stores/taskStore';
 import { TASK_TITLE_MAX_LENGTH } from '~/types/task';
 import { getLocalDate, parseTaskDate } from '~/utils/taskDate';
@@ -92,6 +111,16 @@ const isCalendarOpen = ref(false);
 const calendarButton = ref<HTMLButtonElement | null>(null);
 const taskForm = ref<InstanceType<typeof TaskForm> | null>(null);
 const taskList = ref<InstanceType<typeof TaskList> | null>(null);
+const storageNotice = ref<InstanceType<typeof TaskStorageNotice> | null>(null);
+
+const storageNote = computed(() => {
+  if (taskStore.storageIssue) {
+    return taskStore.isReady
+      ? 'Последнее изменение не сохранено. Повторите действие.'
+      : 'Изменения недоступны, пока сохранённый список не загружен.';
+  }
+  return taskStore.isReady ? 'Задачи сохраняются в этом браузере.' : 'Загружаем сохранённые задачи…';
+});
 
 const dateLabel = computed(() => {
   const date = parseTaskDate(activeDate.value);
@@ -103,14 +132,44 @@ const dateLabel = computed(() => {
 
 onMounted(() => {
   activeDate.value = getLocalDate();
+  taskStore.initialize();
 });
+
+watch(
+  () => taskStore.storageIssue,
+  async (issue) => {
+    if (issue !== 'conflict') return;
+    await nextTick();
+    storageNotice.value?.focusRetry();
+  },
+);
+
+async function retryLoad() {
+  if (!taskStore.initialize()) return;
+  formError.value = '';
+  await nextTick();
+  taskForm.value?.focus();
+}
+
+async function resetStorage() {
+  const confirmed = window.confirm(
+    'Начать новый список? Сохранённые задачи на этом устройстве будут удалены. Отменить это действие нельзя.',
+  );
+  if (!confirmed || !taskStore.resetStorage()) return;
+
+  formError.value = '';
+  await nextTick();
+  taskForm.value?.reset();
+}
 
 function addTask(title: string) {
   formError.value = '';
   const task = taskStore.addTask(title, activeDate.value);
 
   if (!task) {
-    formError.value = `Название должно содержать от 1 до ${TASK_TITLE_MAX_LENGTH} символов.`;
+    if (!taskStore.storageIssue) {
+      formError.value = `Название должно содержать от 1 до ${TASK_TITLE_MAX_LENGTH} символов.`;
+    }
     return;
   }
 
@@ -122,7 +181,7 @@ async function removeTask(id: string) {
   if (index === -1) return;
 
   const focusTarget = taskStore.tasks[index + 1] ?? taskStore.tasks[index - 1];
-  taskStore.removeTask(id);
+  if (!taskStore.removeTask(id)) return;
 
   if (focusTarget && (await taskList.value?.focusTask(focusTarget.id))) return;
   taskForm.value?.focus();

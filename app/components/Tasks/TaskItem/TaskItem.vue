@@ -39,7 +39,12 @@ const inputRef = ref<HTMLInputElement | null>(null);
 
 function handleCompletedChange(event: Event) {
   const input = event.target;
-  if (input instanceof HTMLInputElement) emit('setCompleted', props.item.id, input.checked);
+  if (!(input instanceof HTMLInputElement)) return;
+
+  const completed = input.checked;
+  // The displayed state changes only after the store saves successfully.
+  input.checked = props.item.completed;
+  emit('setCompleted', props.item.id, completed);
 }
 
 function focus() {

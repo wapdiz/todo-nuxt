@@ -27,7 +27,7 @@
       :class="{ 'task-form__note--error': error }"
       :role="error ? 'alert' : undefined"
     >
-      {{ error || 'Пока задачи хранятся только до обновления страницы.' }}
+      {{ error || note }}
     </p>
   </div>
 </template>
@@ -36,9 +36,10 @@
 import TaskIcon from '../TaskIcon/TaskIcon.vue';
 import { TASK_TITLE_MAX_LENGTH } from '~/types/task';
 
-const props = withDefaults(defineProps<{ error?: string; disabled?: boolean }>(), {
+const props = withDefaults(defineProps<{ error?: string; disabled?: boolean; note?: string }>(), {
   error: '',
   disabled: false,
+  note: 'Задачи сохраняются в этом браузере.',
 });
 const emit = defineEmits<{ add: [title: string] }>();
 

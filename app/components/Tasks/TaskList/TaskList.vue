@@ -1,10 +1,10 @@
 <template>
   <section class="task-list" aria-labelledby="task-list-heading">
     <header class="task-list__header">
-      <h2 id="task-list-heading" class="task-list__heading">На сегодня</h2>
+      <h2 id="task-list-heading" class="task-list__heading">Все задачи</h2>
       <p class="task-list__count">{{ completedCount }} из {{ items.length }} выполнено</p>
     </header>
-    <ul v-if="items.length" class="task-list__items" aria-label="Задачи на сегодня">
+    <ul v-if="items.length" class="task-list__items" aria-label="Все задачи">
       <TaskItem
         v-for="item in items"
         :key="item.id"

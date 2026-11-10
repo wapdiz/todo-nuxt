@@ -115,6 +115,18 @@
     margin-top: vc(36);
   }
 
+  &__storage {
+    margin-top: vc(20);
+  }
+
+  &__loading {
+    margin-top: vc(36);
+    font-weight: 400;
+    font-size: vc(13);
+    line-height: 1.5;
+    color: var(--todo-muted);
+  }
+
   &__footer {
     display: flex;
     align-items: center;
@@ -152,6 +164,15 @@
       margin-top: vc(18);
     }
 
+    &__storage {
+      margin-top: vc(10);
+    }
+
+    &__loading {
+      margin-top: vc(18);
+      font-size: vc(6.5);
+    }
+
     &__footer {
       flex-wrap: wrap;
       padding-top: vc(10);
@@ -179,6 +200,15 @@
 
     &__list {
       margin-top: vc(30);
+    }
+
+    &__storage {
+      margin-top: vc(16);
+    }
+
+    &__loading {
+      margin-top: vc(30);
+      font-size: vc(13);
     }
 
     &__footer {
@@ -339,6 +369,11 @@
     font-size: vc(22);
     color: #fff;
     background: var(--todo-accent);
+
+    &:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
 
     @include hover {
       background: #0754d5;

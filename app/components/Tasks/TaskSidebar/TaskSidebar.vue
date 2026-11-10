@@ -51,7 +51,12 @@
       <div class="task-sidebar__current-list">
         <TaskIcon name="list" />
         <span>Мои задачи</span>
-        <span class="task-sidebar__count" :aria-label="`Всего задач: ${taskCount}`">{{ taskCount }}</span>
+        <span
+          class="task-sidebar__count"
+          :aria-label="taskCount === null ? 'Задачи ещё не загружены' : `Всего задач: ${taskCount}`"
+        >
+          {{ taskCount ?? '—' }}
+        </span>
       </div>
     </section>
 
@@ -66,7 +71,7 @@
 import TaskIcon from '../TaskIcon/TaskIcon.vue';
 import { getLocalDate, parseTaskDate } from '~/utils/taskDate';
 
-const props = defineProps<{ taskCount: number; date: string }>();
+const props = defineProps<{ taskCount: number | null; date: string }>();
 const calendarDate = computed(() => parseTaskDate(props.date));
 const monthLabel = computed(() => {
   if (!calendarDate.value) return 'Календарь';
