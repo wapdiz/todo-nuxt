@@ -41,7 +41,7 @@
     background: var(--todo-accent);
 
     @include hover {
-      background: #0854ce;
+      background: var(--todo-accent-hover);
     }
   }
 

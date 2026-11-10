@@ -6,7 +6,7 @@
   >
     <header class="task-list__header">
       <h2 id="task-list-heading" class="task-list__heading">{{ heading }}</h2>
-      <p class="task-list__count">{{ completedCount }} из {{ items.length }} выполнено</p>
+      <p class="task-list__count">{{ effectiveCompletedCount }} из {{ effectiveTotalCount }} выполнено</p>
     </header>
     <p class="visually-hidden" aria-live="polite" aria-atomic="true">{{ announcement }}</p>
     <div v-if="items.length" ref="listWrapRef" class="task-list__wrap">
@@ -22,7 +22,7 @@
           :key="item.id"
           :ref="(component) => setItemRef(item.id, component)"
           :item="item"
-          :draggable="items.length > 1"
+          :draggable="canReorder"
           :dragging="Boolean(dragSession?.active && dragSession.id === item.id)"
           @set-completed="(id, completed) => emit('setCompleted', id, completed)"
           @remove="emit('remove', $event)"
@@ -31,7 +31,7 @@
         />
       </TransitionGroup>
     </div>
-    <p v-else class="task-list__empty">На этот день задач нет.</p>
+    <p v-else class="task-list__empty">{{ emptyText }}</p>
 
     <div
       v-if="floatingItem && dragSession?.active"
@@ -55,11 +55,28 @@ interface TaskItemHandle {
   focus: () => boolean;
   focusGrip: () => boolean;
   getElement: () => HTMLElement | null;
+  hasFocus: () => boolean;
 }
 
 const REORDER_TRANSITION_MS = 220;
 
-const props = withDefaults(defineProps<{ items: Task[]; heading?: string }>(), { heading: 'На выбранный день' });
+const props = withDefaults(
+  defineProps<{
+    items: Task[];
+    heading?: string;
+    totalCount?: number;
+    completedCount?: number;
+    reorderDisabled?: boolean;
+    emptyText?: string;
+  }>(),
+  {
+    heading: 'На выбранный день',
+    totalCount: undefined,
+    completedCount: undefined,
+    reorderDisabled: false,
+    emptyText: 'На этот день задач нет.',
+  },
+);
 const emit = defineEmits<{
   setCompleted: [id: string, completed: boolean];
   remove: [id: string];
@@ -72,7 +89,11 @@ const announcement = ref('');
 const isKeyboardReordering = ref(false);
 let keyboardTimer: number | null = null;
 
-const completedCount = computed(() => props.items.filter((item) => item.completed).length);
+const effectiveTotalCount = computed(() => props.totalCount ?? props.items.length);
+const effectiveCompletedCount = computed(
+  () => props.completedCount ?? props.items.filter((item) => item.completed).length,
+);
+const canReorder = computed(() => !props.reorderDisabled && props.items.length > 1);
 const isReordering = computed(() => Boolean(dragSession.value?.active) || isKeyboardReordering.value);
 
 const displayedItems = computed(() => {
@@ -120,7 +141,9 @@ function setItemRef(id: string, component: unknown) {
     'focusGrip' in component &&
     typeof component.focusGrip === 'function' &&
     'getElement' in component &&
-    typeof component.getElement === 'function'
+    typeof component.getElement === 'function' &&
+    'hasFocus' in component &&
+    typeof component.hasFocus === 'function'
   ) {
     itemRefs.set(id, component as TaskItemHandle);
   } else {
@@ -144,7 +167,7 @@ async function commitDragReorder(draggedId: string, orderedIds: string[]) {
 }
 
 function startDrag(payload: TaskDragStartPayload) {
-  if (props.items.length <= 1) return;
+  if (!canReorder.value) return;
 
   const slots: TaskDragSlot[] = [];
   for (const item of props.items) {
@@ -177,6 +200,7 @@ function startDrag(payload: TaskDragStartPayload) {
 }
 
 async function moveItem(id: string, offset: -1 | 1) {
+  if (!canReorder.value) return;
   const currentIds = props.items.map((item) => item.id);
   const nextIds = moveTaskId(currentIds, id, offset);
   if (!nextIds) return;
@@ -200,12 +224,9 @@ async function moveItem(id: string, offset: -1 | 1) {
   }
 }
 
-watch(
-  () => props.items,
-  () => {
-    dragController.cancel();
-  },
-);
+watch([() => props.items, canReorder], () => {
+  dragController.cancel(true);
+});
 
 onBeforeUnmount(() => {
   dragController.dispose();
@@ -220,7 +241,15 @@ async function focusTask(id: string) {
   return itemRefs.get(id)?.focus() ?? false;
 }
 
-defineExpose({ focusTask });
+function isTaskFocused(id: string) {
+  return itemRefs.get(id)?.hasFocus() ?? false;
+}
+
+function setAnnouncement(text: string) {
+  announcement.value = text;
+}
+
+defineExpose({ focusTask, isTaskFocused, setAnnouncement });
 </script>
 
 <style lang="scss" scoped src="./style.scss"></style>

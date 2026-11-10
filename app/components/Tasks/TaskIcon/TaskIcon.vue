@@ -27,7 +27,11 @@ type IconName =
   | 'trash'
   | 'dots'
   | 'grip'
-  | 'close';
+  | 'close'
+  | 'sliders'
+  | 'sparkles'
+  | 'arrow-up'
+  | 'split';
 
 defineProps<{ name: IconName }>();
 
@@ -47,6 +51,10 @@ const paths: Record<IconName, string[]> = {
   dots: ['M12 5h.01M12 12h.01M12 19h.01'],
   grip: ['M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01'],
   close: ['m6 6 12 12M18 6 6 18'],
+  sliders: ['M4 7h10M18 7h2M14 5v4M4 12h4M12 12h8M8 10v4M4 17h12M20 17h0M16 15v4'],
+  sparkles: ['M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3Z', 'M19 3v4M21 5h-4'],
+  'arrow-up': ['M12 19V5M6 11l6-6 6 6'],
+  split: ['M6 5v6a3 3 0 0 0 3 3h6a3 3 0 0 1 3 3v2', 'M18 5v4M15 8l3-3 3 3M6 14v5'],
 };
 </script>
 

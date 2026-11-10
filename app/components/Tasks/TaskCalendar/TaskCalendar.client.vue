@@ -59,7 +59,7 @@
 import { DatePicker } from 'v-calendar';
 import 'v-calendar/style.css';
 import TaskIcon from '../TaskIcon/TaskIcon.vue';
-import { getLocalDate, isTaskDate, parseTaskDate } from '~/utils/taskDate';
+import { getLocalDate, isTaskDate, parseTaskDate } from '#shared/utils/taskDate';
 
 interface CalendarPage {
   year: number;

@@ -24,6 +24,28 @@
     gap: vc(10);
   }
 
+  &__close {
+    display: none;
+    place-items: center;
+    margin-left: auto;
+    border-radius: vc(8);
+    width: vc(32);
+    height: vc(32);
+    color: var(--todo-muted);
+    background: transparent;
+    cursor: pointer;
+
+    :deep(svg) {
+      width: vc(16);
+      height: vc(16);
+    }
+
+    &:hover {
+      color: var(--todo-text);
+      background: rgb(255 255 255 / 70%);
+    }
+  }
+
   &__mark {
     display: grid;
     flex: 0 0 auto;
@@ -164,6 +186,10 @@
     --sidebar-label-size: #{vc(13)};
     --sidebar-title-size: #{vc(16)};
     --sidebar-icon-size: #{vc(18)};
+
+    &__close {
+      display: grid;
+    }
 
     &__calendar {
       margin-top: vc(24);

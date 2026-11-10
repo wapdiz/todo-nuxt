@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { TASK_TITLE_MAX_LENGTH, type Task } from '../types/task';
 import { reorderTasksForDate } from '../utils/taskCalendar';
-import { isTaskDate } from '../utils/taskDate';
+import { isTaskDate } from '../../shared/utils/taskDate';
 import { createTaskStorage, type TaskStorage, type TaskStorageIssue } from '../utils/taskStorage';
 
 export const useTaskStore = defineStore('tasks', () => {
@@ -68,6 +68,30 @@ export const useTaskStore = defineStore('tasks', () => {
     return commit([task, ...tasks.value]) ? task : null;
   }
 
+  function addTasksBatch(items: ReadonlyArray<{ title: string; scheduledDate: string }>): Task[] | null {
+    if (!canMutate() || items.length === 0) return null;
+
+    const created: Task[] = [];
+    const createdAt = new Date().toISOString();
+
+    for (const item of items) {
+      const normalizedTitle = item.title.trim();
+      if (!normalizedTitle || normalizedTitle.length > TASK_TITLE_MAX_LENGTH || !isTaskDate(item.scheduledDate)) {
+        return null;
+      }
+
+      created.push({
+        id: crypto.randomUUID(),
+        title: normalizedTitle,
+        completed: false,
+        scheduledDate: item.scheduledDate,
+        createdAt,
+      });
+    }
+
+    return commit([...created, ...tasks.value]) ? created : null;
+  }
+
   function setCompleted(id: string, completed: boolean): boolean {
     if (!canMutate()) return false;
     const task = tasks.value.find((item) => item.id === id);
@@ -108,5 +132,16 @@ export const useTaskStore = defineStore('tasks', () => {
     return true;
   }
 
-  return { tasks, isReady, storageIssue, initialize, addTask, setCompleted, removeTask, reorderTasks, resetStorage };
+  return {
+    tasks,
+    isReady,
+    storageIssue,
+    initialize,
+    addTask,
+    addTasksBatch,
+    setCompleted,
+    removeTask,
+    reorderTasks,
+    resetStorage,
+  };
 });

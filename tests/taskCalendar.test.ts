@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { Task } from '../app/types/task';
 import {
+  filterTasksByView,
   getNextVisibleTaskId,
   getTaskDates,
   getTasksForDate,
@@ -9,7 +10,7 @@ import {
   reorderTasksForDate,
   updateDragOrder,
 } from '../app/utils/taskCalendar';
-import { getLocalDate, parseTaskDate } from '../app/utils/taskDate';
+import { getLocalDate, parseTaskDate } from '../shared/utils/taskDate';
 
 function task(id: string, scheduledDate: string, completed = false): Task {
   return { id, title: `Task ${id}`, scheduledDate, completed, createdAt: '2026-11-11T12:00:00.000Z' };
@@ -200,4 +201,26 @@ test('updates drag order smoothly across unequal heights and multi-slot jumps', 
     updateDragOrder(tallMovedUp, 'tall-middle', 20, 5).map((slot) => slot.id),
     ['tall-middle', 'short-top', 'short-bottom'],
   );
+});
+
+test('filterTasksByView filters by completion status without mutating day order', () => {
+  const dayTasks = [
+    task('active-1', '2026-11-11', false),
+    task('done-1', '2026-11-11', true),
+    task('active-2', '2026-11-11', false),
+  ];
+
+  assert.deepEqual(
+    filterTasksByView(dayTasks, 'all').map((item) => item.id),
+    ['active-1', 'done-1', 'active-2'],
+  );
+  assert.deepEqual(
+    filterTasksByView(dayTasks, 'active').map((item) => item.id),
+    ['active-1', 'active-2'],
+  );
+  assert.deepEqual(
+    filterTasksByView(dayTasks, 'completed').map((item) => item.id),
+    ['done-1'],
+  );
+  assert.equal(getNextVisibleTaskId(filterTasksByView(dayTasks, 'active'), 'active-1'), 'active-2');
 });

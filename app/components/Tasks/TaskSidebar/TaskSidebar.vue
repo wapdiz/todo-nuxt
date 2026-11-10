@@ -3,6 +3,15 @@
     <div class="task-sidebar__brand">
       <span class="task-sidebar__mark"><TaskIcon name="check" /></span>
       <span>Список задач</span>
+      <button
+        v-if="showClose"
+        class="task-sidebar__close"
+        type="button"
+        aria-label="Закрыть календарь"
+        @click="emit('close')"
+      >
+        <TaskIcon name="close" />
+      </button>
     </div>
 
     <div class="task-sidebar__calendar">
@@ -46,8 +55,11 @@
 import { TasksTaskCalendar } from '#components';
 import TaskIcon from '../TaskIcon/TaskIcon.vue';
 
-defineProps<{ taskCount: number | null; date: string; today: string; taskDates: string[] }>();
-const emit = defineEmits<{ selectDate: [date: string]; select: [] }>();
+withDefaults(
+  defineProps<{ taskCount: number | null; date: string; today: string; taskDates: string[]; showClose?: boolean }>(),
+  { showClose: false },
+);
+const emit = defineEmits<{ selectDate: [date: string]; select: []; close: [] }>();
 </script>
 
 <style lang="scss" scoped src="./style.scss"></style>

@@ -11,7 +11,7 @@
 
     &:focus-within {
       border-color: var(--todo-accent);
-      box-shadow: 0 0 0 3px rgb(18 102 241 / 9%);
+      box-shadow: 0 0 0 3px var(--todo-accent-ring);
     }
   }
 
@@ -61,7 +61,7 @@
     }
 
     @include hover {
-      background: #0854ce;
+      background: var(--todo-accent-hover);
     }
   }
 

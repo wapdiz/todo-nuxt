@@ -146,8 +146,8 @@
 
   &--placeholder {
     border-style: dashed;
-    border-color: rgb(18 102 241 / 35%);
-    background-color: rgb(18 102 241 / 4%);
+    border-color: var(--todo-accent-border);
+    background-color: var(--todo-accent-soft);
     pointer-events: none;
 
     > * {
@@ -156,7 +156,7 @@
   }
 
   &--floating {
-    border-color: rgb(18 102 241 / 24%);
+    border-color: var(--todo-accent-border);
     box-shadow: 0 vc(14) vc(32) rgb(28 37 48 / 12%), 0 vc(2) vc(6) rgb(28 37 48 / 6%);
     background-color: #fff;
     pointer-events: none;

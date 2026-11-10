@@ -1,5 +1,5 @@
 import { TASK_TITLE_MAX_LENGTH, type Task } from '../types/task';
-import { isTaskDate } from './taskDate';
+import { isTaskDate } from '../../shared/utils/taskDate';
 
 export const TASK_STORAGE_KEY = 'todo-nuxt:tasks:v1';
 

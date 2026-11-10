@@ -158,7 +158,12 @@ function getElement() {
   return rootRef.value;
 }
 
-defineExpose({ focus, focusGrip, getElement });
+function hasFocus() {
+  const active = document.activeElement;
+  return Boolean(rootRef.value && active && rootRef.value.contains(active));
+}
+
+defineExpose({ focus, focusGrip, getElement, hasFocus });
 </script>
 
 <style lang="scss" scoped src="./style.scss"></style>

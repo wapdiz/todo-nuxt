@@ -1,18 +1,22 @@
 .todo-page {
   --todo-font: arial, sans-serif;
-  --todo-text: #25272b;
-  --todo-muted: #6b7079;
-  --todo-accent: #1266f1;
-  --todo-line: rgb(24 32 42 / 9%);
-  --todo-sidebar: #f7f8f8;
+  --todo-text: #1f2421;
+  --todo-muted: #68706a;
+  --todo-accent: #16a34a;
+  --todo-accent-hover: #15803d;
+  --todo-accent-soft: #eaf7ef;
+  --todo-accent-border: rgb(22 163 74 / 28%);
+  --todo-accent-ring: rgb(22 163 74 / 14%);
+  --todo-line: rgb(22 33 27 / 9%);
+  --todo-sidebar: #f7f9f8;
 
   display: flex;
   justify-content: center;
-  padding: vc(32);
+  padding: vc(28);
   min-height: 100svh;
   font-family: var(--todo-font);
   color: var(--todo-text);
-  background: #eef0f1;
+  background: #edf1ee;
 
   :deep(::selection) {
     color: #fff;
@@ -21,7 +25,7 @@
 
   :deep(button:focus-visible) {
     outline: 2px solid var(--todo-accent);
-    outline-offset: 3px;
+    outline-offset: 2px;
   }
 
   @include tablet {
@@ -40,18 +44,39 @@
 .todo-shell {
   position: relative;
   display: grid;
-  grid-template-columns: vc(280) minmax(0, 1fr);
+  grid-template-columns: vc(260) minmax(0, 1fr) vc(356);
   overflow: clip;
   border-radius: vc(28);
   width: 100%;
-  min-height: calc(100svh - #{vc(64)});
-  max-width: vc(1376);
-  box-shadow: 0 vc(12) vc(48) rgb(28 37 48 / 6%);
+  min-height: calc(100svh - #{vc(56)});
+  max-width: vc(1408);
+  box-shadow: 0 vc(14) vc(48) rgb(22 36 28 / 7%);
   background: #fff;
 
   &__sidebar {
     border-right: 1px solid var(--todo-line);
     min-width: 0;
+    background: var(--todo-sidebar);
+  }
+
+  &__sidebar-sticky {
+    position: sticky;
+    top: 0;
+    overflow-y: auto;
+    min-height: calc(100svh - #{vc(56)});
+    max-height: calc(100svh - #{vc(56)});
+  }
+
+  &__ai {
+    border-left: 1px solid var(--todo-line);
+    min-width: 0;
+    background: var(--todo-sidebar);
+  }
+
+  &__ai-sticky {
+    position: sticky;
+    top: 0;
+    height: calc(100svh - #{vc(56)});
   }
 
   &__backdrop {
@@ -62,6 +87,43 @@
     grid-template-columns: vc(116) minmax(0, 1fr);
     border-radius: vc(14);
     min-height: calc(100svh - #{vc(24)});
+
+    &__sidebar-sticky {
+      min-height: calc(100svh - #{vc(24)});
+      max-height: calc(100svh - #{vc(24)});
+    }
+
+    &__ai {
+      position: fixed;
+      right: vc(12);
+      top: vc(12);
+      bottom: vc(12);
+      z-index: 5;
+      display: none;
+      overflow: hidden;
+      border: 1px solid var(--todo-line);
+      border-radius: vc(14);
+      width: vc(220);
+      box-shadow: 0 vc(12) vc(40) rgb(22 36 28 / 18%);
+
+      &--open {
+        display: block;
+      }
+    }
+
+    &__ai-sticky {
+      position: static;
+      height: 100%;
+    }
+
+    &__backdrop {
+      position: fixed;
+      z-index: 4;
+      display: block;
+      padding: 0;
+      background: rgb(22 36 28 / 18%);
+      inset: 0;
+    }
   }
 
   @include mobile {
@@ -73,46 +135,167 @@
       position: absolute;
       left: vc(12);
       right: vc(12);
-      top: vc(89);
-      z-index: 3;
+      top: vc(70);
+      z-index: 5;
       display: none;
       overflow-y: auto;
       border: 0;
       border-radius: vc(18);
-      max-height: calc(100svh - #{vc(124)});
-      box-shadow: 0 vc(12) vc(40) rgb(28 37 48 / 15%);
+      max-height: calc(100svh - #{vc(100)});
+      box-shadow: 0 vc(12) vc(40) rgb(22 36 28 / 16%);
 
       &--open {
         display: block;
       }
     }
 
+    &__sidebar-sticky {
+      position: static;
+      min-height: 0;
+      max-height: none;
+    }
+
+    &__ai {
+      position: fixed;
+      z-index: 5;
+      display: none;
+      overflow: hidden;
+      border: 1px solid var(--todo-line);
+      border-radius: vc(20);
+      width: auto;
+      box-shadow: 0 vc(14) vc(44) rgb(22 36 28 / 22%);
+      inset: vc(10);
+
+      &--open {
+        display: block;
+      }
+    }
+
+    &__ai-sticky {
+      position: static;
+      height: 100%;
+    }
+
     &__backdrop {
-      position: absolute;
-      z-index: 2;
+      position: fixed;
+      z-index: 4;
       display: block;
-      border-radius: inherit;
       padding: 0;
-      background: rgb(28 37 48 / 8%);
+      background: rgb(22 36 28 / 20%);
       inset: 0;
     }
   }
 }
 
+.todo-mobile-bar {
+  display: none;
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--todo-line);
+    border-radius: vc(10);
+    padding: vc(8) vc(12);
+    font-weight: 500;
+    font-size: vc(12);
+    line-height: 1.2;
+    color: var(--todo-text);
+    background: var(--todo-sidebar);
+    cursor: pointer;
+    gap: vc(6);
+
+    :deep(svg) {
+      width: vc(15);
+      height: vc(15);
+      color: var(--todo-accent);
+    }
+  }
+
+  @include tablet {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-bottom: vc(8);
+    gap: vc(4);
+
+    &__calendar {
+      display: none;
+    }
+
+    &__btn {
+      border-radius: vc(5);
+      padding: vc(4) vc(7);
+      font-size: vc(6.5);
+      gap: vc(3.5);
+
+      :deep(svg) {
+        width: vc(8);
+        height: vc(8);
+      }
+    }
+  }
+
+  @include mobile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: vc(16);
+    gap: vc(8);
+
+    &__calendar {
+      display: inline-flex;
+    }
+
+    &__btn {
+      border-radius: vc(10);
+      padding: vc(8) vc(12);
+      min-height: vc(38);
+      font-size: vc(12);
+      gap: vc(6);
+
+      :deep(svg) {
+        width: vc(15);
+        height: vc(15);
+      }
+    }
+  }
+}
+
 .todo-main {
+  position: relative;
   display: flex;
   flex-direction: column;
-  padding: vc(28) vc(44) vc(24);
+  padding: vc(28) vc(38) vc(22);
   min-width: 0;
+  background: #fff;
+
+  &__hero {
+    position: relative;
+    margin: vc(-28) vc(-38) 0;
+    padding: vc(30) vc(38) vc(22);
+  }
+
+  &__aura {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: vc(180);
+    background: radial-gradient(ellipse 65% 80% at 52% -10%, rgb(134 239 172 / 34%) 0%, rgb(134 239 172 / 0%) 72%),
+      radial-gradient(ellipse 48% 70% at 84% 5%, rgb(165 243 252 / 26%) 0%, rgb(165 243 252 / 0%) 72%);
+    pointer-events: none;
+  }
 
   &__content {
-    margin: vc(46) auto vc(48);
+    position: relative;
+    margin: vc(10) auto vc(40);
     width: 100%;
-    max-width: vc(860);
+    max-width: vc(760);
   }
 
   &__list {
-    margin-top: vc(36);
+    margin-top: vc(28);
   }
 
   &__storage {
@@ -120,7 +303,7 @@
   }
 
   &__loading {
-    margin-top: vc(36);
+    margin-top: vc(28);
     font-weight: 400;
     font-size: vc(13);
     line-height: 1.5;
@@ -154,14 +337,23 @@
   }
 
   @include tablet {
-    padding: vc(14) vc(16) vc(12);
+    padding: vc(12) vc(16);
+
+    &__hero {
+      margin: vc(-12) vc(-16) 0;
+      padding: vc(12) vc(16);
+    }
+
+    &__aura {
+      height: vc(90);
+    }
 
     &__content {
-      margin: vc(24) 0;
+      margin: vc(8) 0 vc(20);
     }
 
     &__list {
-      margin-top: vc(18);
+      margin-top: vc(14);
     }
 
     &__storage {
@@ -169,7 +361,7 @@
     }
 
     &__loading {
-      margin-top: vc(18);
+      margin-top: vc(14);
       font-size: vc(6.5);
     }
 
@@ -191,15 +383,24 @@
   }
 
   @include mobile {
-    padding: vc(20);
+    padding: vc(18);
     min-height: calc(100svh - #{vc(20)});
 
+    &__hero {
+      margin: 0;
+      padding: 0 0 vc(16);
+    }
+
+    &__aura {
+      display: none;
+    }
+
     &__content {
-      margin: vc(36) 0 vc(32);
+      margin: vc(8) 0 vc(28);
     }
 
     &__list {
-      margin-top: vc(30);
+      margin-top: vc(24);
     }
 
     &__storage {
@@ -207,7 +408,7 @@
     }
 
     &__loading {
-      margin-top: vc(30);
+      margin-top: vc(24);
       font-size: vc(13);
     }
 
@@ -220,135 +421,29 @@
   }
 }
 
-.todo-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: vc(16);
-
-  &__greeting {
-    display: flex;
-    align-items: center;
-    border-radius: vc(18);
-    padding: vc(12) vc(18) vc(12) vc(12);
-    width: 100%;
-    min-width: 0;
-    background: #f7f8f9;
-    gap: vc(12);
-  }
-
-  &__sun {
-    display: grid;
-    flex: 0 0 auto;
-    place-items: center;
-    border-radius: 50%;
-    width: vc(36);
-    height: vc(36);
-    box-shadow: 0 vc(2) vc(5) rgb(28 37 48 / 4%);
-    font-size: vc(20);
-    color: var(--todo-text);
-    background: #fff;
-  }
-
-  &__hello {
-    font-weight: 500;
-    font-size: vc(16);
-    line-height: 1.5;
-  }
-
-  &__caption {
-    font-weight: 400;
-    font-size: vc(12);
-    line-height: 1.5;
-    color: var(--todo-muted);
-  }
-
-  &__calendar {
-    display: none;
-  }
-
-  @include tablet {
-    &__greeting {
-      border-radius: vc(9);
-      padding: vc(6);
-      gap: vc(6);
-    }
-
-    &__sun {
-      width: vc(18);
-      height: vc(18);
-      font-size: vc(10);
-    }
-
-    &__hello {
-      font-size: vc(8);
-    }
-
-    &__caption {
-      font-size: vc(6);
-    }
-  }
-
-  @include mobile {
-    position: relative;
-    z-index: 4;
-    gap: vc(8);
-
-    &__greeting {
-      border-radius: 0;
-      padding: 0;
-      background: transparent;
-    }
-
-    &__hello {
-      font-size: vc(15);
-    }
-
-    &__calendar {
-      display: flex;
-      flex: 0 0 auto;
-      align-items: center;
-      justify-content: center;
-      border-radius: vc(12);
-      padding: vc(10) vc(12);
-      min-height: vc(40);
-      font-size: vc(12);
-      background: #f2f4f6;
-      gap: vc(7);
-
-      :deep(svg) {
-        width: vc(16);
-        height: vc(16);
-      }
-    }
-
-    &__sun,
-    &__caption {
-      display: none;
-    }
-  }
-}
-
 .todo-heading {
+  position: relative;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: vc(28);
+  margin: 0 auto;
+  max-width: vc(760);
   gap: vc(16);
 
   &__title {
-    font-family: "georgia", 'Times New Roman', serif;
-    font-weight: 400;
-    font-size: vc(38);
+    font-family: var(--todo-font);
+    font-weight: 700;
+    font-size: vc(30);
     line-height: 1.2;
     letter-spacing: -0.025em;
   }
 
   &__date {
-    margin-top: vc(9);
+    margin-top: vc(6);
     font-weight: 400;
     font-size: vc(13);
-    line-height: 1.5;
+    line-height: 1.4;
     color: var(--todo-muted);
   }
 
@@ -356,19 +451,27 @@
     display: flex;
     flex: 0 0 auto;
     align-items: center;
-    gap: vc(16);
+    gap: vc(10);
   }
 
   &__add {
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    padding: vc(10);
-    width: vc(42);
-    height: vc(42);
-    font-size: vc(22);
+    display: inline-flex;
+    align-items: center;
+    border-radius: vc(10);
+    padding: vc(9) vc(15);
+    min-height: vc(38);
+    font-weight: 600;
+    font-size: vc(12);
+    line-height: 1.2;
     color: #fff;
     background: var(--todo-accent);
+    cursor: pointer;
+    gap: vc(6);
+
+    :deep(svg) {
+      width: vc(15);
+      height: vc(15);
+    }
 
     &:disabled {
       opacity: 0.45;
@@ -376,51 +479,70 @@
     }
 
     @include hover {
-      background: #0754d5;
+      background: var(--todo-accent-hover);
     }
   }
 
   @include tablet {
-    margin-bottom: vc(16);
     gap: vc(8);
 
     &__title {
-      font-size: vc(18);
+      font-size: vc(15);
     }
 
     &__date {
-      margin-top: vc(5);
+      margin-top: vc(3);
       font-size: vc(6.5);
     }
 
     &__actions {
-      gap: vc(6);
+      gap: vc(5);
     }
 
     &__add {
-      padding: vc(5);
-      width: vc(21);
-      height: vc(21);
-      font-size: vc(11);
+      border-radius: vc(5);
+      padding: vc(4.5) vc(7.5);
+      min-height: vc(20);
+      font-size: vc(6.5);
+      gap: vc(3);
+
+      :deep(svg) {
+        width: vc(8);
+        height: vc(8);
+      }
     }
   }
 
   @include mobile {
     align-items: flex-start;
-    margin-bottom: vc(25);
-    gap: vc(10);
+    gap: vc(12);
 
     &__title {
-      font-size: vc(32);
+      font-size: vc(26);
     }
 
     &__date {
-      margin-top: vc(8);
+      margin-top: vc(5);
       font-size: vc(12);
     }
 
     &__actions {
-      padding-top: vc(2);
+      width: 100%;
+      gap: vc(8);
+    }
+
+    &__add {
+      margin-left: auto;
+      border-radius: vc(10);
+      padding: vc(8) vc(13);
+      min-height: vc(36);
+      font-size: vc(12);
+      gap: vc(6);
+
+      :deep(svg) {
+        width: vc(14);
+        height: vc(14);
+      }
     }
   }
 }

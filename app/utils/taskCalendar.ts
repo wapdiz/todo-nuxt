@@ -1,9 +1,17 @@
 import type { Task } from '../types/task';
-import { isTaskDate } from './taskDate';
+import { isTaskDate } from '../../shared/utils/taskDate';
+
+export type TaskViewFilter = 'all' | 'active' | 'completed';
 
 export function getTasksForDate(tasks: readonly Task[], date: string): Task[] {
   if (!isTaskDate(date)) return [];
   return tasks.filter((task) => task.scheduledDate === date);
+}
+
+export function filterTasksByView(tasks: readonly Task[], filter: TaskViewFilter): Task[] {
+  if (filter === 'active') return tasks.filter((task) => !task.completed);
+  if (filter === 'completed') return tasks.filter((task) => task.completed);
+  return [...tasks];
 }
 
 export function getTaskDates(tasks: readonly Task[]): string[] {

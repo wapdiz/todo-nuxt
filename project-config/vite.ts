@@ -3,6 +3,8 @@ import type { ViteConfig } from 'nuxt/schema';
 export const viteConfig: ViteConfig = {
   build: {
     rollupOptions: {
+      // Исключает относительные ../shared пути из внешней SSR-сборки, ломающиеся при cacheDir Nuxt.
+      makeAbsoluteExternalsRelative: false,
       output: {
         assetFileNames: (assetInfo) => {
           if (/\.(woff2?|ttf|otf|eot)$/.test(assetInfo.names[0] ?? '')) {

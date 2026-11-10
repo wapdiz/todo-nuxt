@@ -30,3 +30,10 @@ export function parseTaskDate(value: string): Date | null {
 
   return date;
 }
+
+export function shiftTaskDate(value: string, offsetDays: number): string | null {
+  const date = parseTaskDate(value);
+  if (!date || !Number.isInteger(offsetDays)) return null;
+  date.setDate(date.getDate() + offsetDays);
+  return getLocalDate(date);
+}

@@ -1,7 +1,7 @@
 .task-list {
-  --task-list-heading-size: #{vc(19)};
+  --task-list-heading-size: #{vc(17)};
   --task-list-caption-size: #{vc(12)};
-  --task-list-header-gap: #{vc(20)};
+  --task-list-header-gap: #{vc(16)};
 
   min-width: 0;
 
@@ -14,10 +14,11 @@
   }
 
   &__heading {
-    font-family: 'Georgia', 'Times New Roman', serif;
-    font-weight: 400;
+    font-family: var(--todo-font);
+    font-weight: 600;
     font-size: var(--task-list-heading-size);
-    line-height: 1.25;
+    line-height: 1.3;
+    letter-spacing: -0.015em;
     color: var(--todo-text);
   }
 

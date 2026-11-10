@@ -3,7 +3,7 @@ import { beforeEach, test } from 'node:test';
 import { createPinia, setActivePinia } from 'pinia';
 import { useTaskStore } from '../app/stores/taskStore';
 import { TASK_TITLE_MAX_LENGTH, type Task } from '../app/types/task';
-import { getLocalDate, isTaskDate, parseTaskDate } from '../app/utils/taskDate';
+import { getLocalDate, isTaskDate, parseTaskDate } from '../shared/utils/taskDate';
 import type { TaskStorage, TaskStorageIssue } from '../app/utils/taskStorage';
 
 function copyTasks(tasks: readonly Task[]): Task[] {
@@ -440,6 +440,45 @@ test('failed reorder writes leave task order unchanged and surface storage issue
     store.tasks.map((task) => task.id),
     ['first', 'second'],
   );
+  assert.equal(store.storageIssue, 'conflict');
+  assert.equal(store.isReady, false);
+});
+
+test('addTasksBatch commits items in order with a single write and rolls back on failure', () => {
+  const store = useTaskStore();
+  const memory = createMemoryStorage([savedTask('existing')]);
+  store.initialize(memory.port);
+
+  assert.equal(store.addTasksBatch([]), null);
+  assert.equal(
+    store.addTasksBatch([
+      { title: 'Шаг 1', scheduledDate: '2026-11-11' },
+      { title: '   ', scheduledDate: '2026-11-11' },
+    ]),
+    null,
+  );
+  assert.equal(memory.state.saveCalls, 0);
+
+  const created = store.addTasksBatch([
+    { title: '  Шаг 1  ', scheduledDate: '2026-11-11' },
+    { title: 'Шаг 2', scheduledDate: '2026-11-12' },
+  ]);
+  assert.ok(created);
+  assert.equal(created.length, 2);
+  assert.equal(memory.state.saveCalls, 1);
+  assert.deepEqual(
+    store.tasks.map((task) => task.title),
+    ['Шаг 1', 'Шаг 2', 'Задача existing'],
+  );
+
+  memory.state.saveIssue = 'quota-exceeded';
+  assert.equal(store.addTasksBatch([{ title: 'Не запишется', scheduledDate: '2026-11-11' }]), null);
+  assert.equal(store.tasks.length, 3);
+  assert.equal(store.storageIssue, 'quota-exceeded');
+
+  memory.state.saveIssue = 'conflict';
+  assert.equal(store.addTasksBatch([{ title: 'Конфликт', scheduledDate: '2026-11-11' }]), null);
+  assert.equal(store.tasks.length, 3);
   assert.equal(store.storageIssue, 'conflict');
   assert.equal(store.isReady, false);
 });

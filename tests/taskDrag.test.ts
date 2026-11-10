@@ -312,3 +312,28 @@ test('dispose removes all drag and click-suppression listeners cleanly', () => {
   controller.dispose();
   assert.equal(mock.listenerCount(), 0);
 });
+
+test('cancelling an active drag when reorder is disabled keeps suppressing trailing label click', () => {
+  const mock = createMockHost();
+  let completed = false;
+  const controller = createTaskDragController({
+    host: mock.host,
+    onStateChange: () => {},
+    onCommit: () => {},
+  });
+
+  startTitleDrag(controller, 120);
+  mock.dispatch('pointermove', { pointerId: 1, pointerType: 'mouse', clientX: 50, clientY: 127 });
+  assert.equal(controller.isActive(), true);
+
+  controller.cancel(true);
+  assert.equal(controller.isActive(), false);
+
+  mock.dispatch('pointerup', { pointerId: 1, pointerType: 'mouse', clientX: 50, clientY: 127 });
+  const click = mock.dispatchLabelClick(() => {
+    completed = !completed;
+  });
+  assert.equal(click.defaultPrevented, true);
+  assert.equal(completed, false);
+  controller.dispose();
+});
