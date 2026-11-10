@@ -1,0 +1,13 @@
+.share-list {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  gap: vc(14);
+
+  :deep(button) {
+    &:focus-visible {
+      outline: vc(2) solid var(--color-focus);
+      outline-offset: vc(2);
+    }
+  }
+}

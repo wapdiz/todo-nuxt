@@ -1,0 +1,23 @@
+@use './base/variables.scss';
+
+/* stylelint-disable */
+:export {
+  sizes: {
+    desktop-sm: $desktop-sm;
+    desktop-md: $desktop-md;
+    desktop-lg: $desktop-lg;
+    desktop: $desktop;
+    desktop-v: $desktop-v;
+    tablet: $tablet;
+    mobile: $mobile;
+    mobile-v: $mobile-v;
+  };
+  breakpoints: {
+    desktop: $media-desktop;
+    desktop-v: $media-desktop-vertical;
+    devices: $media-devices;
+    device-v: $media-devices-vertical;
+    tablet: $media-tablet;
+  };
+}
+/* stylelint-enable */

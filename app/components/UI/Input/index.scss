@@ -1,0 +1,48 @@
+.input {
+  --color: #{$color-black};
+
+  border: 2px solid transparent;
+  border-radius: vc(16);
+  padding: 0 vc(24);
+  width: 100%;
+  height: vc(62);
+  font-size: vc(20);
+  line-height: 1;
+  color: var(--color);
+  background-color: rgba($color-white, 0.3);
+  transition: 0.3s;
+
+  &::placeholder {
+    color: currentcolor;
+    opacity: 0.6;
+  }
+
+  &:focus {
+    border-color: var(--color);
+  }
+
+  &:disabled {
+    color: rgba($color-black, 0.5);
+    opacity: 1;
+  }
+
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus,
+  &:-webkit-autofill:active {
+    -webkit-text-fill-color: currentcolor;
+    background-color: transparent !important;
+    transition: background-color 5000s ease-in-out 0s; /* чтобы убрать желтизну на autofill */
+  }
+
+  @include hover {
+    border-color: var(--color);
+  }
+
+  @include devices {
+    border-width: 1px;
+    padding: 0 vc(16);
+    height: vc(48);
+    font-size: vc(16);
+  }
+}

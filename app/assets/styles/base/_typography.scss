@@ -1,0 +1,136 @@
+@use "./variables" as *;
+@use "../mixins/helpers" as *;
+@use '../mixins/mixins' as *;
+@use "../functions/functions" as *;
+
+a.link,
+.link {
+  text-decoration: underline;
+  text-decoration-color: currentcolor;
+  transition: $transition;
+
+  // text-decoration-skip-ink: none;
+  text-underline-offset: vc(1);
+
+  @include hover {
+    text-decoration-color: transparent;
+  }
+}
+
+.h1 {
+  font-weight: 700;
+  font-size: vc(32);
+  line-height: 1.1;
+
+  @include devices {
+    font-size: vc(24);
+    line-height: 1.4;
+  }
+}
+
+.h2 {
+  font-weight: 700;
+  font-size: vc(24);
+  line-height: 1.1;
+
+  @include devices {
+    font-size: vc(20);
+    line-height: 1.4;
+  }
+}
+
+.h3 {
+  font-weight: 500;
+  font-size: vc(20);
+
+  @include devices {
+    font-size: vc(18);
+  }
+}
+
+p,
+.desc {
+  font-weight: 400;
+  font-size: vc(16);
+  line-height: 1.1;
+
+  @include devices {
+    font-size: vc(14);
+    line-height: 1.4;
+  }
+}
+
+.list {
+  &-counter {
+    counter-reset: ol;
+    padding-left: vc(25);
+
+    li {
+      position: relative;
+
+      &::before {
+        counter-increment: ol;
+        content: counter(ol) '. ';
+        position: absolute;
+        left: vc(-25);
+        top: vc(0);
+      }
+    }
+  }
+
+  &-bullets {
+    padding-left: vc(25);
+
+    li {
+      position: relative;
+      font-size: vc(16);
+      letter-spacing: vc(-0.4);
+      color: currentcolor;
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: vc(-23);
+        top: vc(8);
+        flex: 0 0 vc(8);
+        border-radius: 50%;
+        width: vc(8);
+        height: vc(8);
+        background: currentcolor;
+
+        // .is-os-mac-os,
+        // .is-os-ios & {
+        //   top: vc(6);
+        // }
+
+        @include devices {
+          left: vc(-15);
+          top: vc(6);
+          flex: 0 0 vc(6);
+          width: vc(6);
+          height: vc(6);
+
+          // .is-os-ios & {
+          //   top: vc(5);
+          // }
+        }
+      }
+
+      &:not(:first-child) {
+        margin-top: vc(4);
+
+        @include devices {
+          margin-top: vc(2);
+        }
+      }
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+strong {
+  font-weight: 700;
+}

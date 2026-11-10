@@ -1,0 +1,40 @@
+// COLORS
+$color-black: #0d171a;
+$color-white: #fff;
+$color-theme: #002355;
+$color-gray-0: #f0f0f0;
+$color-gray: #ededed;
+$color-gray-2: #c8c8c8;
+$color-gray-3: #4b4b4b2f;
+$color-black-main: #000;
+$color-base-pressed: #000000af;
+$color-outline: #007bff;
+$color-green: #235b2f;
+$color-green-hover: #15451f;
+$color-green-hover-2: #5f996b4b;
+$color-green-pressed: #327640;
+$color-hover: #235b2f;
+$color-error: #ff3e4b;
+
+// TRANSITIONS
+$transition-duration: 0.35s;
+$transition-timing-function: ease;
+$transition: $transition-duration $transition-timing-function;
+
+// SETTINGS
+$desktop-xl: 1920;
+$desktop-lg: 1680;
+$desktop-md: 1440;
+$desktop-sm: 1366;
+$desktop: 1280;
+$desktop-v: 700; // высота экрана по макету
+$tablet: 768;
+$mobile: 375;
+$mobile-v: 630; // высота экрана по мобильному макету
+
+// BRAKEPOINTS
+$media-devices: '(max-width: #{$desktop - 0.5px}) and (orientation: portrait)';
+$media-tablet: '(max-width: #{$desktop - 0.5px}) and (min-width: #{$tablet * 1px})';
+$media-desktop: '(orientation: landscape)';
+$media-desktop-vertical: '(aspect-ratio >= #{$desktop-md} / #{$desktop-v})';
+$media-devices-vertical: '(aspect-ratio >= #{$mobile} / #{$mobile-v})';

@@ -1,0 +1,106 @@
+
+@mixin active {
+  color: var(--color);
+
+  &::before {
+    opacity: 1;
+  }
+}
+
+.tabs {
+  --bg-color: var(--color-white);
+  --active-color: var(--color-black);
+  --color: var(--color-white);
+
+  width: 100%;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: vc(32);
+    border: 1px solid var(--bg-color);
+    border-radius: vc(100);
+    padding: vc(13) vc(35);
+
+    @include devices {
+      margin-bottom: vc(16);
+      padding: vc(16) vc(13);
+    }
+  }
+
+  &__button {
+    --before-offset-hor: #{vc(-32)};
+    --before-offset-ver: #{vc(-10)};
+
+    /* stylelint-disable-next-line order/order */
+    position: relative;
+    font-weight: 900;
+    font-size: vc(16);
+    white-space: nowrap;
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: var(--before-offset-hor);
+      top: var(--before-offset-ver);
+      border-radius: vc(100);
+      width: calc(100% - var(--before-offset-hor) * 2);
+      height: calc(100% - var(--before-offset-ver) * 2);
+      background-color: var(--active-color);
+      opacity: 0;
+      transition: inherit;
+    }
+
+    > span {
+      position: relative;
+      z-index: 1;
+    }
+
+    &--active {
+      @include active;
+    }
+
+    @include hover {
+      &::before {
+        background-color: var(--color-hover);
+        opacity: 1;
+      }
+    }
+
+    @include devices {
+      --before-offset-hor: #{vc(-10)};
+      --before-offset-ver: #{vc(-13)};
+
+      font-size: vc(14);
+    }
+  }
+
+  &__content {
+    position: relative;
+    min-height: vc(200);
+
+    @include devices {
+      min-height: auto;
+    }
+  }
+}
+
+// Fade transition animations
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.1s linear;
+}
+
+.fade-leave-active {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}

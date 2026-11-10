@@ -1,0 +1,15 @@
+{
+  "stylelint.config": null,
+  "stylelint.validate": ["css", "less", "postcss", "scss", "postscss", "vue", "vue-html", "vue-scss"],
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "typescript.tsdk": "node_modules\\typescript\\lib",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.fixAll.stylelint": "explicit"
+  },
+  "eslint.enable": true,
+  "eslint.useFlatConfig": true, // Важно для ESLint 9
+  "eslint.validate": ["javascript", "typescript", "vue"]
+}

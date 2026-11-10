@@ -1,0 +1,15 @@
+.phone-instruction {
+  picture {
+    width: 100%;
+    height: vc(228);
+
+    :deep(img) {
+      height: 100%;
+      object-fit: contain;
+    }
+
+    @include devices {
+      height: vc(200);
+    }
+  }
+}

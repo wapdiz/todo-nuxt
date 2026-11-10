@@ -1,0 +1,57 @@
+/* stylelint-disable custom-property-empty-line-before */
+
+@use '../mixins/breakpoint' as *;
+@use './variables' as *;
+@use "../functions/functions" as *;
+
+:root {
+  // FONTS
+  --font-name: 'FontName', arial, sans-serif;
+
+  // COLORS
+  --white: #fff;
+  --color-font: #000;
+  --color-bg: #fff;
+  --focus-color: #007bff;
+
+  // FONT-OPTIONS
+  --font-size: #{vc(16)};
+
+  // SIZES
+  --width-base: #{$desktop-md};
+  --width-current: 100vw;
+  --width-multiplier: var(--width-current) / var(--width-base);
+
+  // если надо ограничить масштабирование и наращивать края контейнера (нужно так же проверить вертикальный десктоп, так как там есть расхождения)
+  // @include desktop-md {
+  //   --width-current: #{$desktop-md}px;
+  // }
+
+  @include desktop-v {
+    --width-base: #{$desktop-v}; // высота экрана в макете
+    --width-current: 100vh;
+  }
+
+  @include devices {
+    // FONT-OPTIONS
+    --font-size: #{vc(14)};
+
+    --width-base: #{$mobile};
+    --width-current: 100vmin;
+  }
+
+  @include devices-v {
+    --width-base: #{$mobile-v};
+    --width-current: 100vh;
+
+    @supports (height: 100svh) {
+      --width-current: 100svh;
+    }
+  }
+
+  // если надо задать размеры на планшете
+  // @include tablet {
+  //   --width-base: $tablet;
+  //   --width-current: 100vmin;
+  // }
+}

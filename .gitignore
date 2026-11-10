@@ -1,0 +1,36 @@
+# Nuxt dev/build outputs
+output
+.data
+.nuxt
+.nitro
+.cache
+dist
+app/assets/sprites
+
+# Node dependencies
+node_modules
+
+# video files
+public/videos/*
+
+# Logs
+logs
+*.log
+
+# Misc
+.DS_Store
+.fleet
+.idea
+*.zip
+
+# Local env files
+.env
+.env.*
+!.env.example
+
+# Mac OS X
+._.*
+._*
+
+# Generated optimized images
+public/assets/images/optimized/

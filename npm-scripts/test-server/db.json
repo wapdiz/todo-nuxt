@@ -1,0 +1,69 @@
+{
+  "posts": [
+    {
+      "id": "1",
+      "title": "a title 1",
+      "views": 100
+    },
+    {
+      "id": "2",
+      "title": "another title",
+      "views": 200
+    },
+    {
+      "id": "3",
+      "title": "a title 3",
+      "views": 100
+    },
+    {
+      "id": "4",
+      "title": "a title 3",
+      "views": 100
+    },
+    {
+      "id": "5",
+      "title": "a title 3",
+      "views": 100
+    },
+    {
+      "id": "7",
+      "title": "a title 3",
+      "views": 100
+    }
+  ],
+  "comments": [
+    {
+      "id": "1",
+      "text": "a comment about post 1",
+      "postId": "1"
+    },
+    {
+      "id": "2",
+      "text": "another comment about post 1",
+      "postId": "1"
+    }
+  ],
+  "form": {
+    "success": {
+      "message": "Thank you for your submission!",
+      "success": true
+    },
+    "error": {
+      "message": "There was an error submitting your form.",
+      "success": false,
+      "status": 422,
+      "data": {
+        "errors": {
+          "email": [
+            "Please enter a valid email address.",
+            "test email 2"
+          ],
+          "phone": [
+            "Please enter a valid phone number.",
+            "test phoe 2"
+          ]
+        }
+      }
+    }
+  }
+}

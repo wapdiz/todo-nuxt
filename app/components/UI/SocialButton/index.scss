@@ -1,0 +1,61 @@
+.social-btn {
+  position: relative;
+  width: vc(30);
+  height: vc(30);
+  transition: 0.3s;
+
+  // &__content {
+  //   display: block;
+  //   border: 1px solid transparent;
+  //   border-radius: 100%;
+  //   width: 100%;
+  //   height: 100%;
+  //   background-color: $color-gray-5;
+  //   transition: inherit;
+  // }
+
+  // &__modal {
+  //   position: absolute;
+  //   left: calc(50% - vc(64));
+  //   bottom: calc(100% + vc(14));
+  //   border-radius: vc(10);
+  //   padding: vc(6) vc(5);
+  //   width: vc(136);
+  //   font-weight: 400;
+  //   font-size: vc(10);
+  //   line-height: 1.2;
+  //   color: $color-blue-3;
+  //   background-color: $color-white;
+  //   opacity: 0;
+  //   visibility: hidden;
+  //   transition: $transition;
+
+  //   @include devices {
+  //     left: calc(50% - vc(56));
+  //     bottom: calc(100% + vc(8));
+  //     border-radius: vc(10);
+  //     padding: vc(6) vc(0);
+  //     width: vc(112);
+  //     font-size: vc(8);
+  //     line-height: 1.1;
+  //   }
+  // }
+
+  // &.is-show {
+  //   .social-btn__modal {
+  //     opacity: 1;
+  //     visibility: visible;
+  //   }
+  // }
+
+  // &.is-active {
+  //   .social-btn__content {
+  //     opacity: 0.6;
+  //   }
+  // }
+
+  @include devices {
+    width: vc(32);
+    height: vc(32);
+  }
+}

@@ -1,0 +1,208 @@
+/* stylelint-disable custom-property-empty-line-before */
+@use '@/assets/styles/mixins/helpers' as *;
+
+.v-btn {
+  --width: auto;
+  --height: #{vc(76)};
+  --min-width: auto;
+  --max-width: auto;
+  --padding: 0 #{vc(40)};
+  --font-size: #{vc(24)};
+  --border-radius: #{vc(100)};
+  --bg: #{$color-black};
+  --bg-hover: #{$color-black-main};
+  --color: #{$color-white};
+
+  --width-svg: #{vc(36)};
+  --height-svg: #{vc(36)};
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius);
+  padding: var(--padding);
+  width: var(--width);
+  height: var(--height);
+  min-width: var(--min-width);
+  max-width: var(--max-width);
+  font-weight: 700;
+  font-size: var(--font-size);
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--color);
+  background-color: var(--bg);
+  /* stylelint-disable-next-line @stylistic/declaration-colon-space-after */
+  transition:
+    background-color $transition,
+    color $transition,
+    border-color $transition,
+    opacity $transition;
+
+  svg {
+    width: var(--width-svg);
+    height: var(--height-svg);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+
+    @include devices {
+      outline-width: 1px;
+    }
+  }
+
+  &:disabled,
+  &.is-disabled {
+    --bg: #{$color-gray} !important;
+    --color: #{$color-gray-2} !important;
+
+    pointer-events: none;
+  }
+
+  @include hover {
+    background-color: var(--bg-hover);
+  }
+
+  @include devices {
+    --height: #{vc(44)};
+    --font-size: #{vc(13)};
+    --padding: 0 #{vc(40)};
+  }
+
+  /* stylelint-disable-next-line order/order */
+  &--pressed {
+    --bg: #{$color-base-pressed};
+    --bg-hover: #{$color-base-pressed};
+  }
+
+  &--full {
+    --width: 100%;
+  }
+
+  &--small {
+    --height: #{vc(48)};
+    --min-width: #{vc(145)};
+  }
+
+  &--400 {
+    --width: 100%;
+    --max-width: #{vc(400)};
+  }
+
+  &--square {
+    --height: #{vc(44)};
+    --padding: 0;
+    --border-radius: #{vc(10)};
+    --width: #{vc(44)};
+
+    svg {
+      --width-svg: #{vc(24)};
+      --height-svg: #{vc(24)};
+    }
+
+    @include devices {
+      --height: #{vc(40)};
+      --border-radius: #{vc(8)};
+      --width: #{vc(40)};
+
+      svg {
+        --width-svg: #{vc(20)};
+        --height-svg: #{vc(20)};
+      }
+    }
+  }
+
+  &--icon {
+    --padding: 0 #{vc(24)} 0 #{vc(8)};
+
+    display: flex;
+    margin-top: vc(2);
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    gap: vc(5);
+
+    @include devices {
+      --padding: 0 #{vc(20)} 0 #{vc(8)};
+    }
+  }
+
+  &--outline {
+    border: 1px solid var(--bg);
+    color: var(--bg);
+    background: transparent;
+
+    @include desktop {
+      &:not(:hover) {
+        color: var(--bg);
+      }
+    }
+
+    @include devices {
+      color: var(--bg);
+    }
+
+    @include hover {
+      border-color: var(--bg-hover);
+      color: var(--color);
+      background-color: var(--bg-hover);
+    }
+  }
+
+  &--circle {
+    --padding: 0;
+    --height: #{vc(44)};
+    --border-radius: 50%;
+    --font-size: #{vc(20)};
+
+    flex: 0 0 var(--height);
+    width: var(--height);
+    min-width: auto;
+
+    svg {
+      --width-svg: #{vc(24)};
+      --height-svg: #{vc(24)};
+    }
+
+    @include devices {
+      --height: #{vc(38)};
+    }
+  }
+
+  &--green {
+    --bg: #{$color-green};
+    --bg-hover: #{$color-green-hover};
+
+    /* stylelint-disable-next-line order/order */
+    &.v-btn--pressed {
+      --bg: #{$color-green-pressed};
+      --bg-hover: #{$color-green-pressed};
+    }
+  }
+
+  &--white {
+    --bg: #{$color-white};
+    --bg-hover: #{$color-white};
+    --color: #{$color-green};
+
+    /* stylelint-disable-next-line order/order */
+    &.v-btn--pressed {
+      --bg: #{$color-green};
+      --bg-hover: #{$color-green};
+      --color: #{$color-white};
+    }
+  }
+
+  &--white-green {
+    --bg: #{$color-white};
+    --bg-hover: #{$color-green-hover-2};
+    --color: #{$color-green};
+
+    /* stylelint-disable-next-line order/order */
+    &.v-btn--pressed {
+      --bg: #{$color-green};
+      --bg-hover: #{$color-green};
+      --color: #{$color-white};
+    }
+  }
+}

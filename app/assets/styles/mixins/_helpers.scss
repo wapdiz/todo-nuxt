@@ -1,0 +1,80 @@
+@use "sass:map";
+@use "./breakpoint" as *;
+
+@function max($numbers...) {
+  @return m#{a}x(#{$numbers});
+}
+
+@function min($numbers...) {
+  @return m#{i}n(#{$numbers});
+}
+
+@mixin supports-safe-area-insets {
+  @supports (padding: max(0px)) {
+    @content;
+  }
+}
+
+@mixin text-border($color, $border, $ieColor, $width: 1px, $ieWidth: 1px) {
+  // stylelint-disable-next-line
+  text-shadow:
+    ($ieWidth) ($ieWidth) $border,
+    0 0 $border,
+    $width ($ieWidth) $border,
+    0 $width $border;
+  color: $ieColor;
+
+  @supports (-webkit-text-stroke: $width $border) {
+    /* stylelint-disable-next-line no-invalid-position-declaration */
+    text-shadow: none;
+    // stylelint-disable-next-line
+    -webkit-text-stroke: $width $border;
+    /* stylelint-disable-next-line no-invalid-position-declaration */
+    color: $color;
+  }
+}
+
+@mixin font-face($font-name, $font-weight: 400, $font-style: normal, $path: '../assets/fonts/') {
+  $font-weights: (
+    100: 'Thin',
+    200: 'ExtraLight',
+    300: 'Light',
+    400: 'Regular',
+    500: 'Medium',
+    600: 'SemiBold',
+    700: 'Bold',
+    800: 'ExtraBold',
+    900: 'Black'
+  );
+
+  $font-type: map.get($font-weights, $font-weight) + if($font-style == italic, 'Italic', '');
+
+  @font-face {
+    src: url('#{$path}#{$font-name}/#{$font-name}-#{$font-type}.woff2') format('woff2'),
+      url('#{$path}#{$font-name}/#{$font-name}-#{$font-type}.woff') format('woff');
+    font-family: $font-name;
+    font-weight: $font-weight;
+    font-style: $font-style;
+    font-display: swap;
+  }
+}
+
+@mixin hover {
+  @include desktop {
+    @media (hover: hover) and (pointer: fine) {
+      &:not([disabled]):hover {
+        @content;
+      }
+    }
+  }
+}
+
+@mixin hoverOpacity {
+  @include desktop {
+    transition: opacity 0.5s ease;
+
+    &:hover {
+      opacity: 0.7;
+    }
+  }
+}

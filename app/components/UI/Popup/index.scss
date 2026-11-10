@@ -1,0 +1,139 @@
+.popup {
+  position: fixed;
+  z-index: 295;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  pointer-events: none;
+  inset: 0;
+
+  &__content {
+    position: relative;
+    z-index: 1;
+    padding: vc(60) vc(60) vc(50);
+    width: vc(570);
+    color: $color-black;
+    background: $color-white;
+    pointer-events: auto;
+
+    > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .popup--fullscreen & {
+      width: 100%;
+      height: 100%;
+    }
+
+    @include devices {
+      margin-left: 0;
+      padding: vc(40) vc(32) vc(32);
+      width: vc(334);
+      min-width: auto;
+    }
+  }
+
+  &__close {
+    // --bg-color: transparent;
+    // --bg-color-hover: transparent;
+    // --color: #{$color-green-3};
+    // --color-hover: #{$color-green};
+
+    position: absolute;
+    right: vc(20);
+    top: vc(20);
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: vc(32);
+    height: vc(32);
+    box-shadow: none;
+    backdrop-filter: none;
+
+    svg {
+      width: vc(18);
+      height: vc(18);
+
+      @include devices {
+        width: vc(14);
+        height: vc(14);
+      }
+    }
+
+    @include hover {
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+
+    @include devices {
+      right: vc(8);
+      top: vc(8);
+      padding: vc(2);
+      width: vc(20);
+      height: vc(20);
+
+      .popup--results &,
+      .popup--winners & {
+        right: vc(12);
+        top: vc(12);
+        width: vc(32);
+        height: vc(32);
+
+        svg {
+          width: vc(18);
+          height: vc(18);
+        }
+      }
+    }
+  }
+
+  &--preloader {
+    z-index: 200;
+
+    .wrapper {
+      border-radius: 0;
+      padding: 0;
+      background: $color-black;
+    }
+
+    .btn {
+      display: none;
+    }
+  }
+}
+
+.popup-overlay {
+  position: fixed;
+  z-index: 294;
+  background-color: rgba($color-black, 0.4);
+  pointer-events: all;
+  /* stylelint-disable-next-line property-no-vendor-prefix */
+  -webkit-backdrop-filter: blur(vc(6));
+  backdrop-filter: blur(vc(6));
+  inset: 0;
+}
+
+// Transition animations
+.popup-fade-enter-active,
+.popup-fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.popup-fade-enter-from,
+.popup-fade-leave-to {
+  opacity: 0;
+}
+
+.popup-up-enter-active,
+.popup-up-leave-active {
+  transition: 0.3s ease;
+}
+
+.popup-up-enter-from,
+.popup-up-leave-to {
+  opacity: 0;
+  transform: translate3d(0, vc(25), 0);
+}

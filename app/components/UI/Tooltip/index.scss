@@ -1,0 +1,121 @@
+$arrowWidth: 18;
+$arrowHeight: 21;
+
+.tooltip {
+  width: vc(20);
+  height: vc(20);
+}
+
+.icon {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.content {
+  display: block;
+  padding: vc(12) vc(20);
+  max-width: vc(375);
+  font-size: vc(16);
+  line-height: 130%;
+  letter-spacing: -0.01em;
+  color: $color-white;
+  background-color: $color-green;
+
+  @include devices {
+    min-width: vc(300);
+    max-width: vc(343);
+    font-size: vc(13);
+    line-height: vc(18);
+  }
+}
+
+:global(.tippy-svg-arrow) {
+  width: vc($arrowWidth) !important;
+  height: vc($arrowHeight) !important;
+  color: $color-white;
+}
+
+// bottom
+:global([data-placement='right-end'] .tippy-svg-arrow),
+:global([data-placement='left-end'] .tippy-svg-arrow),
+:global([data-placement='bottom'] .tippy-svg-arrow) {
+  top: vc(-($arrowHeight - 3)) !important;
+}
+
+:global([data-placement='right-end'] .tippy-svg-arrow svg),
+:global([data-placement='left-end'] .tippy-svg-arrow svg),
+:global([data-placement='bottom'] .tippy-svg-arrow svg) {
+  transform: rotate(90deg);
+}
+
+:global(.tippy-box[data-placement='right-end']),
+:global(.tippy-box[data-placement='left-end']),
+:global(.tippy-box[data-placement='bottom']) {
+  top: vc(10);
+}
+
+// top
+:global([data-placement='right-start'] .tippy-svg-arrow),
+:global([data-placement='left-start'] .tippy-svg-arrow),
+:global([data-placement='top'] .tippy-svg-arrow) {
+  top: calc(100% - vc(2));
+}
+
+:global([data-placement='left-end'] .tippy-svg-arrow svg),
+:global([data-placement='left-start'] .tippy-svg-arrow svg),
+:global([data-placement='top'] .tippy-svg-arrow svg) {
+  transform: rotate(-90deg) translateX(2px);
+}
+
+:global(.tippy-box[data-placement='right-start']),
+:global(.tippy-box[data-placement='left-start']),
+:global(.tippy-box[data-placement='top']) {
+  top: vc(-10);
+}
+
+// left-end, left-start, left
+:global([data-placement='left-start'] .tippy-svg-arrow),
+:global([data-placement='left-end'] .tippy-svg-arrow),
+:global([data-placement='left'] .tippy-svg-arrow) {
+  left: calc(100% - 1px);
+}
+
+:global([data-placement='left-end'] .tippy-svg-arrow svg),
+:global([data-placement='left-start'] .tippy-svg-arrow svg),
+:global([data-placement='left'] .tippy-svg-arrow svg) {
+  transform: rotate(180deg);
+}
+
+:global(.tippy-box[data-placement='left-end']),
+:global(.tippy-box[data-placement='left-start']),
+:global(.tippy-box[data-placement='left']) {
+  left: vc(-10);
+}
+
+// right-end, right-start, right
+:global([data-placement='right-end'] .tippy-svg-arrow),
+:global([data-placement='right-start'] .tippy-svg-arrow),
+:global([data-placement='right'] .tippy-svg-arrow) {
+  left: vc(-($arrowWidth - 3)) !important;
+}
+
+:global(.tippy-box[data-placement='right-end']),
+:global(.tippy-box[data-placement='right-start']),
+:global(.tippy-box[data-placement='right']) {
+  right: vc(-10);
+}
+
+:global(.tippy-box) {
+  position: relative;
+  opacity: 0;
+  visibility: hidden;
+  filter: drop-shadow(0 0 vc(52) rgb(0 0 0 / 6%)) drop-shadow(0 vc(2) vc(4) rgb(0 0 0 / 5%));
+  transition: 0.5s;
+}
+
+:global(.tippy-box[data-state='visible']) {
+  opacity: 1;
+  visibility: visible;
+}

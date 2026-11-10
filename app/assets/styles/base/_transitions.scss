@@ -1,0 +1,43 @@
+$base-transition-duration: 0.5s;
+$page-duration: 0.75s;
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity $base-transition-duration ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.fade-leave-to {
+  transition: opacity $base-transition-duration ease;
+}
+
+.fade-up-enter-active,
+.fade-up-leave-active,
+.fade-up-leave-to {
+  transition: opacity $base-transition-duration ease, transform $base-transition-duration ease;
+}
+
+.fade-up-enter-from,
+.fade-up-leave-to {
+  opacity: 0;
+  transform: translateY(10%);
+}
+
+// page transition
+.page-enter-active,
+.page-leave-active {
+  transition: opacity $page-duration ease;
+}
+
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+}
+
+.page-leave-to {
+  transition: opacity $page-duration ease;
+}

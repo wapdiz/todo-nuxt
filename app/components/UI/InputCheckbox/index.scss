@@ -1,0 +1,96 @@
+.flex {
+  display: flex;
+}
+
+.checkbox-label {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-size: vc(13);
+  line-height: vc(16);
+  letter-spacing: 0;
+  text-align: left;
+
+  span {
+    transition: $transition;
+  }
+
+  .error-message {
+    margin-top: vc(8);
+  }
+
+  @include hover {
+    .checkbox {
+      outline-color: $color-black;
+    }
+  }
+}
+
+.checkbox-text {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox {
+  --checkbox-width: #{vc(22)};
+  --radius: #{vc(4)};
+
+  position: relative;
+  flex: 0 0 var(--checkbox-width);
+  margin-right: vc(12);
+  outline: 1px solid transparent;
+  border: 1px solid $color-black;
+  border-radius: var(--radius);
+  width: var(--checkbox-width);
+  height: var(--checkbox-width);
+  transition: $transition;
+
+  @include desktop {
+    margin-top: 0;
+  }
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+
+  &:focus-visible + .flex {
+    .checkbox {
+      outline-color: $color-black;
+    }
+  }
+}
+
+input[type='checkbox']:checked ~ * .checkbox {
+  background-color: $color-black;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    border-radius: 50%;
+    width: 75%;
+    height: 75%;
+    background-image: url('../../../assets/icons/check.svg');
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.checkbox-group {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  padding-top: vc(22);
+  gap: vc(12);
+
+  @include devices {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}

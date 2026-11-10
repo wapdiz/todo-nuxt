@@ -1,0 +1,58 @@
+.copy {
+  width: vc(30);
+  height: vc(30);
+  color: $color-white;
+}
+
+.tip {
+  position: absolute;
+  left: 50%;
+  top: vc(35);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  border-radius: vc(16);
+  padding: vc(16);
+  min-width: vc(255);
+  background: linear-gradient(90deg, #f6f6f6), $color-white;
+  background-size: 0% 100%;
+  background-repeat: no-repeat;
+  opacity: 1;
+  transform: translateX(-50%);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+  gap: vc(8);
+
+  &__icon {
+    width: vc(22);
+    height: vc(22);
+    color: $color-black;
+  }
+
+  &__text {
+    flex-shrink: 0;
+    line-height: 1.2;
+    color: $color-black;
+  }
+
+  &.is-animate {
+    opacity: 1;
+
+    // transform: translateX(-50%) translateY(-5px);
+    animation: fill-gradient 3s forwards;
+  }
+
+  @keyframes fill-gradient {
+    from {
+      background-size: 0% 100%;
+    }
+
+    to {
+      background-size: 100% 100%;
+    }
+  }
+}
+
+// .tip.is-animate {
+//   animation: fill-gradient 3s forwards;
+// }

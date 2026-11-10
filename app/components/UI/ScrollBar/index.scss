@@ -1,0 +1,52 @@
+// $scrollBarPadding: vc(10);
+.scroll-bar {
+  // margin-right: vc(-16); // если нужно вынести полоску за пределы основного контейнера
+  // padding-right: vc(16);
+}
+
+.os-scrollbar-vertical {
+  --os-track-border-radius: 0;
+  --os-handle-border-radius: #{vc(10)};
+
+  right: vc(0);
+  z-index: 1;
+  padding: 0;
+  width: vc(6);
+  height: 100%;
+
+  .os-scrollbar-track {
+    width: 100%;
+    background-color: transparent;
+
+    .os-scrollbar-handle {
+      background-color: currentcolor;
+      cursor: pointer;
+    }
+  }
+}
+
+// .os-scrollbar-horizontal {
+//   .os-scrollbar-track {
+//     height: vc(5);
+//     // background-color: $color-lite-gray !important;
+
+//     .os-scrollbar-handle {
+//       border-radius: vc(10);
+//       // background-color: rgba($color-yellow, 0.5);
+//     }
+//   }
+// }
+
+// .os-scrollbar-horizontal,
+// .os-scrollbar-vertical {
+//   @include devices {
+//     display: none;
+//   }
+// }
+
+// .scroll-bar {
+//   @include desktop {
+//     padding-right: vc($scrollBarPadding);
+//     width: calc(100% + vc($scrollBarPadding));
+//   }
+// }

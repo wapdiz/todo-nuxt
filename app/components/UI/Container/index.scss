@@ -1,0 +1,36 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+
+  &__wrapper {
+    position: relative;
+    padding: 0 vc(68);
+    width: 100%;
+    max-width: vc($desktop-md);
+
+    @include devices {
+      padding: 0 vc(15);
+      max-width: vc($mobile);
+    }
+  }
+
+  /* stylelint-disable-next-line order/order */
+  &--full-screen {
+    overflow: hidden;
+    /* stylelint-disable-next-line declaration-block-no-duplicate-properties */
+    height: var(--vh);
+    /* stylelint-disable-next-line declaration-block-no-duplicate-properties */
+    height: 100svh;
+
+    .container__wrapper {
+      height: vc($desktop-v);
+
+      @include devices {
+        height: vc($mobile-v);
+        max-height: 100%;
+      }
+    }
+  }
+}
