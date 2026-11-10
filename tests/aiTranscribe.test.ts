@@ -243,13 +243,25 @@ test('HTTP integration: /api/ai-transcribe enforces limits, shares guard with ch
       },
     });
     assert.equal(guard.getStats().globalInFlight, 0);
-    // 4. Некорректные данные -> 400, ошибка upstream -> 502, таймаут -> 504
+    // 4. Некорректные данные -> 400 (дневная квота не тратится), ошибка upstream -> 502, таймаут -> 504
+    const countBeforeBadTranscribe = guard.getStats().dailyCount;
     const badRes = await fetch(`http://127.0.0.1:${port}/api/ai-transcribe`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ audioBase64: 'not-valid', format: 'webm' }),
     });
     assert.equal(badRes.status, 400);
+    assert.equal(guard.getStats().dailyCount, countBeforeBadTranscribe);
+    assert.equal(guard.getStats().globalInFlight, 0);
+
+    // Ошибочный ответ от пустого JSON-объекта на обоих маршрутах не мешает следующему валидному запросу.
+    const emptyChatBad = await fetch(`http://127.0.0.1:${port}/api/ai-chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{}',
+    });
+    assert.equal(emptyChatBad.status, 400);
+    assert.equal(guard.getStats().dailyCount, countBeforeBadTranscribe);
 
     const errApp = createApp();
     errApp.use(

@@ -9,9 +9,21 @@ export interface AiGuardConfig {
   now?: () => number;
 }
 
+export type AiDailyReserveResult =
+  | {
+      ok: true;
+    }
+  | {
+      ok: false;
+      reason: 'daily-limit';
+      retryAfterSec: number;
+      message: string;
+    };
+
 export type AiGuardAcquireResult =
   | {
       ok: true;
+      reserveDailyQuota: () => AiDailyReserveResult;
       release: () => void;
     }
   | {
@@ -96,6 +108,29 @@ export function createAiGuard(config: AiGuardConfig) {
   let dailyDayKey = '';
   let dailyCount = 0;
 
+  function syncDailyBucket(currentMs: number): number {
+    const { dayKey, retryAfterSec } = getUtcDayKey(currentMs);
+    if (dayKey !== dailyDayKey) {
+      dailyDayKey = dayKey;
+      dailyCount = 0;
+    }
+    return retryAfterSec;
+  }
+
+  function createDailyLimitRejection(dayRetrySec: number): {
+    ok: false;
+    reason: 'daily-limit';
+    retryAfterSec: number;
+    message: string;
+  } {
+    return {
+      ok: false,
+      reason: 'daily-limit',
+      retryAfterSec: Math.min(dayRetrySec, Math.ceil(DAY_MS / 1000)),
+      message: 'Достигнут дневной лимит обращений к ассистенту. Попробуйте завтра.',
+    };
+  }
+
   function pruneWindows(currentMs: number) {
     for (const [key, entry] of ipWindows) {
       if (currentMs - entry.windowStartMs >= WINDOW_MS) {
@@ -127,19 +162,9 @@ export function createAiGuard(config: AiGuardConfig) {
       };
     }
 
-    const { dayKey, retryAfterSec: dayRetrySec } = getUtcDayKey(currentMs);
-    if (dayKey !== dailyDayKey) {
-      dailyDayKey = dayKey;
-      dailyCount = 0;
-    }
-
+    const dayRetrySec = syncDailyBucket(currentMs);
     if (dailyCount >= config.dailyLimit) {
-      return {
-        ok: false,
-        reason: 'daily-limit',
-        retryAfterSec: Math.min(dayRetrySec, Math.ceil(DAY_MS / 1000)),
-        message: 'Достигнут дневной лимит обращений к ассистенту. Попробуйте завтра.',
-      };
+      return createDailyLimitRejection(dayRetrySec);
     }
 
     let windowEntry = ipWindows.get(safeIp);
@@ -162,11 +187,23 @@ export function createAiGuard(config: AiGuardConfig) {
     }
 
     windowEntry.count += 1;
-    dailyCount += 1;
     globalInFlight += 1;
     ipInFlight.set(safeIp, currentIpInFlight + 1);
 
     let released = false;
+    let dailyReserved = false;
+
+    const reserveDailyQuota = (): AiDailyReserveResult => {
+      if (dailyReserved) return { ok: true };
+      const retrySec = syncDailyBucket(now());
+      if (dailyCount >= config.dailyLimit) {
+        return createDailyLimitRejection(retrySec);
+      }
+      dailyCount += 1;
+      dailyReserved = true;
+      return { ok: true };
+    };
+
     const release = () => {
       if (released) return;
       released = true;
@@ -176,7 +213,7 @@ export function createAiGuard(config: AiGuardConfig) {
       else ipInFlight.set(safeIp, active);
     };
 
-    return { ok: true, release };
+    return { ok: true, reserveDailyQuota, release };
   }
 
   function getStats() {
