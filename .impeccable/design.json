@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-10T16:42:35Z",
+  "title": "Design System: Список задач",
+  "extensions": {
+    "shadows": [
+      { "name": "shell", "value": "0 vc(12) vc(48) rgb(28 37 48 / 6%)", "purpose": "Слабая тень общей оболочки." },
+      { "name": "calendar-mobile", "value": "0 vc(12) vc(40) rgb(28 37 48 / 15%)", "purpose": "Открытый календарь над содержимым на телефоне." },
+      { "name": "field-focus", "value": "0 0 0 3px rgb(18 102 241 / 9%)", "purpose": "Кольцо поля при фокусе внутри." }
+    ],
+    "breakpoints": [
+      { "name": "mobile", "value": "(max-width: 767px)" },
+      { "name": "tablet", "value": "(min-width: 768px) and (max-width: 1279.5px) and (orientation: portrait)" },
+      { "name": "desktop-v", "value": "(orientation: landscape) and (aspect-ratio >= 1440 / 700)" },
+      { "name": "devices-v", "value": "(max-width: 1279.5px) and (orientation: portrait) and (aspect-ratio >= 375 / 630)" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Кнопка фокуса поля",
+      "kind": "button",
+      "refersTo": "button-add",
+      "description": "Круглая кнопка «+» в заголовке; в приложении переводит фокус в поле.",
+      "html": "<button class=\"ds-add\" aria-label=\"Перейти к полю новой задачи\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"M12 5v14M5 12h14\"/></svg></button>",
+      "css": ".ds-add{display:grid;place-items:center;border:0;border-radius:50%;width:42px;height:42px;padding:10px;background:#1266f1;color:#fff;cursor:pointer}.ds-add:hover{background:#0754d5}.ds-add:focus-visible{outline:2px solid #1266f1;outline-offset:3px}"
+    },
+    {
+      "name": "Отключённая кнопка добавления",
+      "kind": "button",
+      "refersTo": "button-submit-disabled",
+      "description": "Состояние кнопки при пустом названии или до успешной загрузки сохранённых задач.",
+      "html": "<button class=\"ds-submit\" disabled>Добавить</button>",
+      "css": ".ds-submit{border:0;border-radius:9px;padding:9px 15px;min-height:36px;font:500 12px Arial,sans-serif;color:#6b7079;background:#f1f3f5;cursor:default}"
+    },
+    {
+      "name": "Поле новой задачи",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Название 1–200 символов после trim(); отправка кнопкой или Enter с защитой IME на выбранную дату. Очистка и фокус только после успешной записи в localStorage; при ошибке или смене даты черновик остаётся.",
+      "html": "<div class=\"ds-field\"><span aria-hidden=\"true\">+</span><input aria-label=\"Название новой задачи\" placeholder=\"Что нужно сделать?\"/></div>",
+      "css": ".ds-field{display:flex;align-items:center;gap:12px;border:1px solid rgb(24 32 42 / 9%);border-radius:14px;padding:7px 17px;min-height:40px;background:#fff;color:#6b7079}.ds-field:focus-within{border-color:#1266f1;box-shadow:0 0 0 3px rgb(18 102 241 / 9%)}.ds-field input{flex:1;min-width:0;border:0;padding:8px 0;font:14px/1.5 Arial,sans-serif;color:#25272b;caret-color:#1266f1;background:transparent}.ds-field input::placeholder{color:#6b7079;opacity:1}.ds-field input:focus-visible{outline:0}"
+    },
+    {
+      "name": "Текущий личный список",
+      "kind": "nav",
+      "description": "Обзор одного личного списка со счётчиком всех сохранённых задач, независимо от выбранной даты; здесь показан пример значения.",
+      "html": "<div class=\"ds-current\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#1266f1\" stroke-width=\"1.5\" aria-hidden=\"true\"><path d=\"M9 6h11M9 12h11M9 18h11M4 6h1M4 12h1M4 18h1\"/></svg><span>Мои задачи</span><span class=\"ds-count\">5</span></div>",
+      "css": ".ds-current{display:flex;align-items:center;gap:10px;border-radius:12px;padding:11px 12px;box-shadow:0 2px 8px rgb(35 41 50 / 3%);font:500 13px/1.3 Arial,sans-serif;color:#25272b;background:rgb(255 255 255 / 85%)}.ds-count{margin-left:auto;font-size:12px;font-variant-numeric:tabular-nums;color:#6b7079}"
+    },
+    {
+      "name": "Выполненная задача",
+      "kind": "card",
+      "refersTo": "task-completed",
+      "description": "Образец выполненной строки. В приложении доступны снятие отметки и удаление с переносом фокуса к соседней видимой задаче выбранного дня или полю.",
+      "html": "<div class=\"ds-task\"><span class=\"ds-check\" aria-hidden=\"true\">✓</span><span>Подготовить рабочее пространство</span></div>",
+      "css": ".ds-task{display:flex;align-items:center;gap:12px;min-height:38px;border-radius:10px;padding:10px 12px;font:14px/1.55 Arial,sans-serif;background:#f7f8f9;color:#6b7079}.ds-task>span:last-child{text-decoration:line-through;overflow-wrap:anywhere}.ds-check{display:grid;place-items:center;flex:0 0 18px;width:18px;height:18px;border-radius:5px;background:#1266f1;color:#fff}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Operate",
+    "overview": "Светлый спокойный интерфейс для личного списка: нейтральный календарь слева, белая рабочая область и синий акцент для выбранного состояния. Georgia выделяет заголовки; Arial сохраняет ясность элементов управления.",
+    "keyCharacteristics": [
+      "Мягкие светлые поверхности, свободное пространство, тонкие разделители.",
+      "Небольшое число синих акцентов: знак приложения, выбранная дата, кнопка «+», отметка выполнения.",
+      "Задачи восстанавливаются из браузера; загрузка и ошибки хранения явно отражены в интерфейсе."
+    ],
+    "rules": [
+      { "name": "The Scaling Rule", "body": "Размеры задаются через существующую `vc()` и проектные миксины. Корневые брейкпоинты и расчёт масштаба сохраняются. Только поверхность страницы внутри `mobile` переопределяет `--width-base: 375` и `--width-current: 100vmin`, чтобы локальная компоновка не зависела от корневого portrait/landscape-масштаба. Высота оболочки учитывает `100svh`.", "section": "layout" }
+    ],
+    "dos": [
+      "**Do** использовать чистую `vc()` или переменные с `vc()`, без пиксельных ограничений через `min()`, `max()` или `clamp()`; сохранять существующие миксины.",
+      "**Do** размещать компонент в собственной папке с `.vue` и `style.scss`, использовать БЭМ и `script setup lang=\"ts\"`.",
+      "**Do** явно показывать загрузку и ошибки хранения, сохранять черновик при неудачной записи и видимый клавиатурный фокус."
+    ],
+    "donts": [
+      "**Don't** добавлять аккаунты, команды или проекты в текущий каркас.",
+      "**Don't** оформлять отключённые действия как уже работающие функции.",
+      "**Don't** добавлять liquidglass, анимации или новую систему брейкпоинтов в этап 5."
+    ]
+  }
+}

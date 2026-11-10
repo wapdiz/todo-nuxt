@@ -20,6 +20,14 @@ export default defineNuxtConfig({
     : {}),
   fonts: fontsConfig,
   runtimeConfig: {
+    n8nWebhookUrl: '',
+    n8nAuthHeaderName: 'X-Todo-Ai-Token',
+    n8nAuthHeaderValue: '',
+    aiTrustProxy: false,
+    aiRateLimitPerMinute: 12,
+    aiDailyRequestLimit: 200,
+    aiMaxConcurrentPerIp: 1,
+    aiMaxConcurrentGlobal: 4,
     public: {
       picturePaths: PICTURE_PATHS,
     },
@@ -39,7 +47,7 @@ export default defineNuxtConfig({
   },
   devServer: {
     port: 3000,
-    host: 'http://localhost:3000/',
+    host: '127.0.0.1',
   },
   app: {
     baseURL: baseURL,

@@ -1,4 +1,4 @@
-﻿import { defineEventHandler, readBody } from 'h3';
+﻿import { createError, defineEventHandler, readBody } from 'h3';
 import { optimizePublicImage } from '../utils/picture-optimizer';
 
 interface OptimizeBody {
@@ -40,6 +40,10 @@ function toFallbackSet(original: string): OptimizedSet {
 }
 
 export default defineEventHandler(async (event) => {
+  if (!import.meta.dev) {
+    throw createError({ statusCode: 404, statusMessage: 'Not Found' });
+  }
+
   const body = await readBody<OptimizeBody>(event);
 
   const desktopPath = normalizeAssetPath(body?.path, body?.ext);
