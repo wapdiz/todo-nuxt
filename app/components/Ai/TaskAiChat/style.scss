@@ -224,6 +224,29 @@
     }
   }
 
+  &__voice-status {
+    display: flex;
+    align-items: center;
+    margin-bottom: vc(7);
+    font-size: vc(11);
+    line-height: 1.35;
+    color: var(--todo-muted);
+    gap: vc(6);
+
+    &--recording {
+      color: #b42318;
+    }
+  }
+
+  &__voice-dot {
+    flex: 0 0 auto;
+    border-radius: 50%;
+    width: vc(7);
+    height: vc(7);
+    background: #b42318;
+    animation: ai-voice-pulse 1.3s ease-in-out infinite;
+  }
+
   &__composer {
     display: flex;
     align-items: flex-end;
@@ -231,7 +254,7 @@
     border-radius: vc(14);
     padding: vc(8) vc(8) vc(8) vc(12);
     background: var(--todo-sidebar);
-    gap: vc(8);
+    gap: vc(6);
 
     &:focus-within {
       border-color: var(--todo-accent);
@@ -261,6 +284,44 @@
 
     &:focus-visible {
       outline: 0;
+    }
+  }
+
+  &__mic {
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 50%;
+    width: vc(32);
+    height: vc(32);
+    color: var(--todo-muted);
+    background: #ebefec;
+    cursor: pointer;
+
+    :deep(svg) {
+      width: vc(15);
+      height: vc(15);
+    }
+
+    &:hover:not(:disabled, .ai-chat__mic--recording) {
+      color: var(--todo-text);
+      background: #e1e6e3;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    &--recording {
+      color: #b42318;
+      background: #fee4e2;
+      animation: ai-voice-pulse 1.3s ease-in-out infinite;
+    }
+
+    &--busy {
+      color: var(--todo-accent);
+      background: var(--todo-accent-soft);
     }
   }
 
@@ -496,14 +557,35 @@
       font-size: vc(6);
     }
 
+    &__voice-status {
+      margin-bottom: vc(4);
+      font-size: vc(6);
+      gap: vc(3);
+    }
+
+    &__voice-dot {
+      width: vc(4);
+      height: vc(4);
+    }
+
     &__composer {
       border-radius: vc(7);
       padding: vc(4) vc(4) vc(4) vc(6);
-      gap: vc(4);
+      gap: vc(3);
     }
 
     &__input {
       max-height: vc(48);
+    }
+
+    &__mic {
+      width: vc(16);
+      height: vc(16);
+
+      :deep(svg) {
+        width: vc(8);
+        height: vc(8);
+      }
     }
 
     &__send {
@@ -651,15 +733,36 @@
       font-size: vc(12);
     }
 
+    &__voice-status {
+      margin-bottom: vc(7);
+      font-size: vc(11.5);
+      gap: vc(6);
+    }
+
+    &__voice-dot {
+      width: vc(7);
+      height: vc(7);
+    }
+
     &__composer {
       border-radius: vc(14);
       padding: vc(8) vc(8) vc(8) vc(12);
-      gap: vc(8);
+      gap: vc(6);
     }
 
     &__input {
       max-height: vc(96);
       font-size: vc(13);
+    }
+
+    &__mic {
+      width: vc(32);
+      height: vc(32);
+
+      :deep(svg) {
+        width: vc(15);
+        height: vc(15);
+      }
     }
 
     &__send {
@@ -712,5 +815,16 @@
     &__picker-empty {
       font-size: vc(12);
     }
+  }
+}
+
+@keyframes ai-voice-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(180 35 24 / 24%);
+  }
+
+  50% {
+    box-shadow: 0 0 0 4px rgb(180 35 24 / 0%);
   }
 }

@@ -35,6 +35,52 @@ function getUtcDayKey(timestampMs: number): { dayKey: string; retryAfterSec: num
   return { dayKey, retryAfterSec };
 }
 
+export interface AiGuardRuntimeConfig {
+  aiRateLimitPerMinute: number;
+  aiDailyRequestLimit: number;
+  aiMaxConcurrentPerIp: number;
+  aiMaxConcurrentGlobal: number;
+}
+
+const DEFAULT_GUARD_CONFIG = {
+  rateLimitPerMinute: 12,
+  dailyLimit: 200,
+  maxConcurrentPerIp: 1,
+  maxConcurrentGlobal: 4,
+};
+
+let sharedGuard: ReturnType<typeof createAiGuard> | null = null;
+let sharedGuardKey = '';
+
+export function getSharedAiGuard(config: AiGuardRuntimeConfig) {
+  const rateLimitPerMinute = Math.max(
+    1,
+    Number(config.aiRateLimitPerMinute) || DEFAULT_GUARD_CONFIG.rateLimitPerMinute,
+  );
+  const dailyLimit = Math.max(1, Number(config.aiDailyRequestLimit) || DEFAULT_GUARD_CONFIG.dailyLimit);
+  const maxConcurrentPerIp = Math.max(
+    1,
+    Number(config.aiMaxConcurrentPerIp) || DEFAULT_GUARD_CONFIG.maxConcurrentPerIp,
+  );
+  const maxConcurrentGlobal = Math.max(
+    maxConcurrentPerIp,
+    Number(config.aiMaxConcurrentGlobal) || DEFAULT_GUARD_CONFIG.maxConcurrentGlobal,
+  );
+  const nextKey = `${rateLimitPerMinute}:${dailyLimit}:${maxConcurrentPerIp}:${maxConcurrentGlobal}`;
+
+  if (!sharedGuard || sharedGuardKey !== nextKey) {
+    sharedGuard = createAiGuard({
+      rateLimitPerMinute,
+      dailyLimit,
+      maxConcurrentPerIp,
+      maxConcurrentGlobal,
+    });
+    sharedGuardKey = nextKey;
+  }
+
+  return sharedGuard;
+}
+
 export function resolveClientIp(event: H3Event, trustProxy: boolean): string {
   const ip = getRequestIP(event, { xForwardedFor: trustProxy });
   return ip?.trim() || 'unknown';

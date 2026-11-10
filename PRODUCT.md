@@ -16,15 +16,16 @@ web
 
 ## Capabilities and Constraints
 
-- Nuxt 4, Vue 3, TypeScript, Pinia, SCSS, npm; серверная сборка (`npm run build:server` / `npm run start:server` с `IS_PROD=true` и `--env-file-if-exists=.env`) для `POST /api/ai-chat` и статика (`npm run build`) без API.
+- Nuxt 4, Vue 3, TypeScript, Pinia, SCSS, npm; серверная сборка (`npm run build:server` / `npm run start:server` с `IS_PROD=true` и `--env-file-if-exists=.env`) для `POST /api/ai-chat` и `POST /api/ai-transcribe`, а также статика (`npm run build`) без API.
 - **Локальное хранилище (`localStorage`):** формат `{ version: 1, tasks }` под ключом `todo-nuxt:tasks:v1`, защита от перезаписи устаревших вкладок, восстановление/сброс повреждённых данных только с подтверждением.
 - **Фильтр и DnD:** фильтр «Вид» (`Все`, `Активные`, `Выполненные`) в памяти; перетаскивание мышью, касанием и клавиатурой работает в режиме «Все», при переключении фильтра активный drag корректно отменяется без случайного переключения чекбокса.
+- **Голосовой ввод и транскрибация (`POST /api/ai-transcribe`):** микрофон доступен в поле создания задачи (`TaskForm`) и в окне ИИ-чата (`TaskAiChat`). Запись через `MediaRecorder` (до `45` с, до `1 MiB` аудио, `<= 1.5 MiB` JSON) уходит через Nuxt в общий webhook n8n (`action: "transcribe"`) и распознаётся моделью `openai/whisper-large-v3-turbo` на OpenRouter с автоопределением языка; расшифровка вставляется в поле без автоотправки для ручной проверки.
 - **ИИ-чат (`TaskAiChat`):** без регистрации и серверной памяти диалога. С каждым запросом передаётся ограниченная клиентская история (`<= 6` сообщений), до `40` задач выбранной даты и `activeDate`/`todayDate`.
 - **Подтверждение действий:** ИИ предлагает только `add_tasks` и `split_task` (удаление и массовые правки не поддерживаются). Задачи добавляются одним пакетом (`addTasksBatch`) только по кнопке `Добавить`; при `split_task` исходная задача остаётся в списке.
 - **Серверная безопасность и защита расходов:**
   - Авторизационный заголовок к webhook n8n хранится в `runtimeConfig` (не в клиенте и не в `localStorage`).
-  - Потоковое чтение Node `Readable` с пределом `64 KiB`, таймаутом чтения `10 c` и снятием слушателей без утечек/исключений `h3`.
-  - Конкурентность (`1` на IP / `4` глобально с обязательным освобождением в `finally`), лимит `12/мин` на IP и `200/день` UTC, настраиваемый `NUXT_AI_TRUST_PROXY`.
+  - Потоковое чтение Node `Readable` с лимитами тела (`64 KiB` для чата, `1.5 MiB` для аудио) и таймаутами без утечек/исключений `h3`.
+  - Общий защитный лимитер (`aiRateLimit`) для чата и транскрибации: конкурентность `1` на IP / `4` глобально с обязательным освобождением в `finally`, `12/мин` на IP и `200/день` UTC, настраиваемый `NUXT_AI_TRUST_PROXY`.
   - В n8n workflow отключено сохранение логов запусков (`saveDataSuccessExecution: "none"`, `saveDataErrorExecution: "none"`, `saveManualExecutions: false`, `saveExecutionProgress: false`), выход модели ограничен `maxOutputTokens: 1024`.
 - Верстка строится на `vc()` и существующих брейкпоинтах без `min()`, `max()`, `clamp()`.
 

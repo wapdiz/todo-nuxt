@@ -7,7 +7,7 @@
     padding: vc(7) vc(8) vc(7) vc(17);
     min-height: vc(54);
     background: #fff;
-    gap: vc(12);
+    gap: vc(10);
 
     &:focus-within {
       border-color: var(--todo-accent);
@@ -40,6 +40,46 @@
 
     &:focus-visible {
       outline: 0;
+    }
+  }
+
+  &__mic {
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: vc(9);
+    width: vc(36);
+    height: vc(36);
+    color: var(--todo-muted);
+    background: #f3f5f4;
+    cursor: pointer;
+
+    :deep(svg) {
+      width: vc(16);
+      height: vc(16);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    &--recording {
+      color: #b42318;
+      background: #fee4e2;
+      animation: task-voice-pulse 1.3s ease-in-out infinite;
+    }
+
+    &--busy {
+      color: var(--todo-accent);
+      background: var(--todo-accent-soft);
+    }
+
+    @include hover {
+      &:not(.task-form__mic--recording) {
+        color: var(--todo-text);
+        background: #e8ecea;
+      }
     }
   }
 
@@ -94,6 +134,17 @@
       font-size: vc(7);
     }
 
+    &__mic {
+      border-radius: vc(5);
+      width: vc(18);
+      height: vc(18);
+
+      :deep(svg) {
+        width: vc(9);
+        height: vc(9);
+      }
+    }
+
     &__submit {
       border-radius: vc(5);
       padding: vc(5) vc(7);
@@ -110,16 +161,38 @@
   @include mobile {
     &__field {
       padding-left: vc(12);
-      gap: vc(8);
+      gap: vc(6);
     }
 
     &__input {
       font-size: vc(14);
     }
 
+    &__mic {
+      border-radius: vc(8);
+      width: vc(32);
+      height: vc(32);
+
+      :deep(svg) {
+        width: vc(15);
+        height: vc(15);
+      }
+    }
+
     &__submit {
       padding-right: vc(12);
       padding-left: vc(12);
     }
+  }
+}
+
+@keyframes task-voice-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(180 35 24 / 22%);
+  }
+
+  50% {
+    box-shadow: 0 0 0 4px rgb(180 35 24 / 0%);
   }
 }

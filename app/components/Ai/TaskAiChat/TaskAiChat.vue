@@ -13,7 +13,7 @@
             class="ai-chat__close"
             type="button"
             aria-label="Закрыть ИИ-чат"
-            @click="emit('close')"
+            @click="handleClose"
           >
             <TaskIcon name="close" />
           </button>
@@ -54,12 +54,22 @@
         </ul>
       </div>
 
-      <div v-if="error" class="ai-chat__error" role="alert">
-        <span>{{ error }}</span>
-        <button class="ai-chat__error-close" type="button" aria-label="Скрыть ошибку" @click="emit('dismissError')">
+      <div v-if="displayedError" class="ai-chat__error" role="alert">
+        <span>{{ displayedError }}</span>
+        <button class="ai-chat__error-close" type="button" aria-label="Скрыть ошибку" @click="dismissAllErrors">
           <TaskIcon name="close" />
         </button>
       </div>
+
+      <p
+        v-if="voiceStatusLabel"
+        class="ai-chat__voice-status"
+        :class="{ 'ai-chat__voice-status--recording': isVoiceRecording }"
+        aria-live="polite"
+      >
+        <span v-if="isVoiceRecording" class="ai-chat__voice-dot" aria-hidden="true"></span>
+        <span>{{ voiceStatusLabel }}</span>
+      </p>
 
       <form class="ai-chat__composer" @submit.prevent="submitMessage">
         <textarea
@@ -70,16 +80,32 @@
           :maxlength="AI_MAX_MESSAGE_LENGTH"
           aria-label="Сообщение для ИИ-помощника"
           placeholder="Спросите о задачах или напишите план…"
-          :disabled="isPending"
+          :disabled="isPending || isVoiceTranscribing"
+          @input="handleDraftInput"
           @compositionstart="isComposing = true"
           @compositionend="isComposing = false"
           @keydown.enter="handleEnter"
         ></textarea>
+        <button
+          class="ai-chat__mic"
+          :class="{
+            'ai-chat__mic--recording': isVoiceRecording,
+            'ai-chat__mic--busy': isVoiceStarting || isVoiceTranscribing,
+          }"
+          type="button"
+          :aria-label="micButtonLabel"
+          :aria-pressed="isVoiceRecording"
+          :title="micButtonLabel"
+          :disabled="isPending || isVoiceTranscribing"
+          @click="toggleVoice"
+        >
+          <TaskIcon :name="isVoiceRecording ? 'stop' : 'mic'" />
+        </button>
         <button class="ai-chat__send" type="submit" aria-label="Отправить сообщение" :disabled="!canSend">
           <TaskIcon name="arrow-up" />
         </button>
       </form>
-      <p class="ai-chat__privacy">Сообщения и задачи выбранного дня отправляются в n8n и Gemini.</p>
+      <p class="ai-chat__privacy">Сообщения, задачи дня и аудиозаписи отправляются в n8n.</p>
     </div>
 
     <div class="ai-chat__quick">
@@ -126,15 +152,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue';
 import type { AiChatMode } from '#shared/types/aiChat';
+import type { AiTranscribeResponse } from '#shared/types/aiTranscribe';
 import { AI_MAX_MESSAGE_LENGTH } from '#shared/utils/aiChat';
+import { mergeTranscribedDraft } from '#shared/utils/aiTranscribe';
 import { parseTaskDate } from '#shared/utils/taskDate';
 import TaskAiProposalCard from '../TaskAiProposalCard/TaskAiProposalCard.vue';
 import TaskIcon from '~/components/Tasks/TaskIcon/TaskIcon.vue';
 import type { Task } from '~/types/task';
 import { createAiComposerController, type AiChatMessage } from '~/utils/aiChatState';
 import { focusFirstFocusable } from '~/utils/drawerFocus';
+import { createVoiceRecorderController, formatVoiceDuration } from '~/utils/voiceRecorder';
 
 const props = withDefaults(
   defineProps<{
@@ -168,8 +197,53 @@ const isComposing = ref(false);
 const rootRef = ref<HTMLElement | null>(null);
 const inputRef = ref<HTMLTextAreaElement | null>(null);
 const threadRef = ref<HTMLDivElement | null>(null);
+const voiceNotice = ref('');
 
-const canSend = computed(() => composer.canSend(props.isPending));
+const voice = createVoiceRecorderController({
+  createState: (initial) => reactive(initial),
+  transcribeAudio: (payload, signal) =>
+    $fetch<AiTranscribeResponse>('/api/ai-transcribe', {
+      method: 'POST',
+      body: payload,
+      signal,
+    }),
+  onTranscript(text) {
+    const merged = mergeTranscribedDraft(composer.state.draft, text, AI_MAX_MESSAGE_LENGTH);
+    composer.state.draft = merged.value;
+    voiceNotice.value = merged.truncated
+      ? `Текст сокращён до ${AI_MAX_MESSAGE_LENGTH} символов. Проверьте перед отправкой.`
+      : '';
+    focusInput();
+  },
+  onEmptyTranscript() {
+    voiceNotice.value = 'Речь не распознана. Попробуйте сказать чуть громче.';
+    focusInput();
+  },
+});
+
+const isVoiceStarting = computed(() => voice.state.status === 'starting');
+const isVoiceRecording = computed(() => voice.state.status === 'recording');
+const isVoiceTranscribing = computed(() => voice.state.status === 'transcribing');
+
+const micButtonLabel = computed(() => {
+  if (isVoiceRecording.value) return 'Остановить запись голоса';
+  if (isVoiceStarting.value) return 'Отменить включение микрофона';
+  if (isVoiceTranscribing.value) return 'Расшифровываем речь';
+  return 'Надиктовать сообщение голосом';
+});
+
+const displayedError = computed(() => props.error || voice.state.error);
+
+const voiceStatusLabel = computed(() => {
+  if (isVoiceStarting.value) return 'Запрашиваем доступ к микрофону…';
+  if (isVoiceRecording.value) {
+    return `Запись ${formatVoiceDuration(voice.state.elapsedMs)} — нажмите стоп, чтобы распознать`;
+  }
+  if (isVoiceTranscribing.value) return 'Расшифровываем речь…';
+  return voiceNotice.value;
+});
+
+const canSend = computed(() => composer.canSend(props.isPending) && voice.state.status === 'idle');
 
 const splitCandidates = computed(() => {
   const active = props.dayTasks.filter((task) => !task.completed);
@@ -181,6 +255,21 @@ const activeDateLabel = computed(() => {
   if (!date) return 'выбранный день';
   return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
 });
+
+function handleDraftInput() {
+  voiceNotice.value = '';
+  voice.clearError();
+}
+
+function toggleVoice() {
+  voiceNotice.value = '';
+  voice.toggle();
+}
+
+function dismissAllErrors() {
+  voice.clearError();
+  if (props.error) emit('dismissError');
+}
 
 function handleEnter(event: KeyboardEvent) {
   if (isComposing.value || event.isComposing || event.keyCode === 229) {
@@ -194,8 +283,11 @@ function handleEnter(event: KeyboardEvent) {
 }
 
 function submitMessage() {
+  if (!canSend.value) return;
   const payload = composer.submit(props.isPending);
   if (!payload) return;
+  voiceNotice.value = '';
+  voice.clearError();
   emit('send', payload);
 }
 
@@ -220,12 +312,22 @@ function handlePanelKeydown(event: KeyboardEvent) {
 
 function sendSplitTask(task: Task) {
   if (props.isPending) return;
+  voice.cancel();
+  voiceNotice.value = '';
   emit('send', composer.prepareSplitTask(task.title));
 }
 
 function handleClear() {
+  voice.cancel();
+  voiceNotice.value = '';
   composer.reset();
   emit('clear');
+}
+
+function handleClose() {
+  voice.cancel();
+  voiceNotice.value = '';
+  emit('close');
 }
 
 function focusInput() {
@@ -264,7 +366,18 @@ watch(
   },
 );
 
-defineExpose({ focusInput, restoreDraft });
+watch(
+  () => props.isPending,
+  (pending) => {
+    if (pending) voice.cancel();
+  },
+);
+
+onBeforeUnmount(() => {
+  voice.dispose();
+});
+
+defineExpose({ focusInput, restoreDraft, cancelVoice: () => voice.cancel() });
 </script>
 
 <style lang="scss" scoped src="./style.scss"></style>

@@ -6,56 +6,14 @@ import {
   parseAiChatResponse,
 } from '../../shared/utils/aiChat';
 import { readBoundedJsonBody } from './aiBody';
-import { createAiGuard, resolveClientIp } from './aiRateLimit';
+import type { AiGuardRuntimeConfig, createAiGuard } from './aiRateLimit';
+import { getSharedAiGuard, resolveClientIp } from './aiRateLimit';
 
-export interface AiChatRuntimeConfig {
+export interface AiChatRuntimeConfig extends AiGuardRuntimeConfig {
   n8nWebhookUrl: string;
   n8nAuthHeaderName: string;
   n8nAuthHeaderValue: string;
   aiTrustProxy: boolean;
-  aiRateLimitPerMinute: number;
-  aiDailyRequestLimit: number;
-  aiMaxConcurrentPerIp: number;
-  aiMaxConcurrentGlobal: number;
-}
-
-const DEFAULT_GUARD_CONFIG = {
-  rateLimitPerMinute: 12,
-  dailyLimit: 200,
-  maxConcurrentPerIp: 1,
-  maxConcurrentGlobal: 4,
-};
-
-let sharedGuard: ReturnType<typeof createAiGuard> | null = null;
-let sharedGuardKey = '';
-
-function getAiGuard(config: AiChatRuntimeConfig) {
-  const rateLimitPerMinute = Math.max(
-    1,
-    Number(config.aiRateLimitPerMinute) || DEFAULT_GUARD_CONFIG.rateLimitPerMinute,
-  );
-  const dailyLimit = Math.max(1, Number(config.aiDailyRequestLimit) || DEFAULT_GUARD_CONFIG.dailyLimit);
-  const maxConcurrentPerIp = Math.max(
-    1,
-    Number(config.aiMaxConcurrentPerIp) || DEFAULT_GUARD_CONFIG.maxConcurrentPerIp,
-  );
-  const maxConcurrentGlobal = Math.max(
-    maxConcurrentPerIp,
-    Number(config.aiMaxConcurrentGlobal) || DEFAULT_GUARD_CONFIG.maxConcurrentGlobal,
-  );
-  const nextKey = `${rateLimitPerMinute}:${dailyLimit}:${maxConcurrentPerIp}:${maxConcurrentGlobal}`;
-
-  if (!sharedGuard || sharedGuardKey !== nextKey) {
-    sharedGuard = createAiGuard({
-      rateLimitPerMinute,
-      dailyLimit,
-      maxConcurrentPerIp,
-      maxConcurrentGlobal,
-    });
-    sharedGuardKey = nextKey;
-  }
-
-  return sharedGuard;
 }
 
 export interface AiChatHandlerDeps {
@@ -93,7 +51,7 @@ export function createAiChatHandler(deps: AiChatHandlerDeps) {
       });
     }
 
-    const guard = deps.guard ?? getAiGuard(config);
+    const guard = deps.guard ?? getSharedAiGuard(config);
     const clientIp = resolveClientIp(event, Boolean(config.aiTrustProxy));
     const slot = guard.acquire(clientIp);
 

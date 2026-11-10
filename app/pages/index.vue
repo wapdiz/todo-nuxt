@@ -279,6 +279,7 @@ function syncDrawerBreakpoints() {
     isCalendarOpen.value = false;
   }
   if (aiDrawerMedia && !aiDrawerMedia.matches && isAiOpen.value) {
+    aiChatRef.value?.cancelVoice();
     isAiOpen.value = false;
   }
 }
@@ -428,6 +429,7 @@ async function closeCalendar() {
 
 async function closeAi() {
   if (!isAiOpen.value) return;
+  aiChatRef.value?.cancelVoice();
   isAiOpen.value = false;
   await nextTick();
   aiButton.value?.focus();
@@ -442,6 +444,7 @@ async function toggleCalendar() {
   if (isCalendarOpen.value) {
     await closeCalendar();
   } else {
+    aiChatRef.value?.cancelVoice();
     isAiOpen.value = false;
     isCalendarOpen.value = true;
     await nextTick();

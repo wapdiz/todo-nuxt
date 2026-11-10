@@ -31,7 +31,9 @@ type IconName =
   | 'sliders'
   | 'sparkles'
   | 'arrow-up'
-  | 'split';
+  | 'split'
+  | 'mic'
+  | 'stop';
 
 defineProps<{ name: IconName }>();
 
@@ -55,6 +57,8 @@ const paths: Record<IconName, string[]> = {
   sparkles: ['M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3Z', 'M19 3v4M21 5h-4'],
   'arrow-up': ['M12 19V5M6 11l6-6 6 6'],
   split: ['M6 5v6a3 3 0 0 0 3 3h6a3 3 0 0 1 3 3v2', 'M18 5v4M15 8l3-3 3 3M6 14v5'],
+  mic: ['M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z', 'M19 10v2a7 7 0 0 1-14 0v-2', 'M12 19v3M9 22h6'],
+  stop: ['M7 7h10v10H7z'],
 };
 </script>
 

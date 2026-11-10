@@ -16,7 +16,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "nuxt typecheck",
-    "test": "tsx --test tests/taskStore.test.ts tests/taskStorage.test.ts tests/taskCalendar.test.ts tests/taskDrag.test.ts tests/aiChat.test.ts tests/drawerFocus.test.ts",
+    "test": "tsx --test tests/taskStore.test.ts tests/taskStorage.test.ts tests/taskCalendar.test.ts tests/taskDrag.test.ts tests/aiChat.test.ts tests/aiTranscribe.test.ts tests/drawerFocus.test.ts",
     "stylelint": "stylelint \"**/*.(css|scss|vue)\"",
     "stylelint:fix": "stylelint \"**/*.(css|scss|vue)\" --fix",
     "lint:all": "npm run lint && npm run stylelint",
