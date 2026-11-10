@@ -5,18 +5,20 @@
       <span>Список задач</span>
     </div>
 
-    <section class="task-sidebar__calendar" aria-labelledby="calendar-preview-title">
+    <section class="task-sidebar__calendar" aria-labelledby="calendar-preview-title" :aria-busy="!calendarDate">
       <div class="task-sidebar__calendar-header">
         <button class="task-sidebar__arrow" type="button" aria-label="Предыдущий месяц" disabled>
           <TaskIcon name="chevron-left" />
         </button>
-        <h2 id="calendar-preview-title" class="task-sidebar__month">Ноябрь <span>2026</span></h2>
+        <h2 id="calendar-preview-title" class="task-sidebar__month">
+          {{ monthLabel }} <span v-if="calendarDate">{{ calendarDate.getFullYear() }}</span>
+        </h2>
         <button class="task-sidebar__arrow" type="button" aria-label="Следующий месяц" disabled>
           <TaskIcon name="chevron-right" />
         </button>
       </div>
 
-      <table class="task-sidebar__calendar-grid" aria-label="Календарь на ноябрь 2026 года">
+      <table class="task-sidebar__calendar-grid" :aria-label="calendarLabel">
         <thead>
           <tr>
             <th v-for="weekday in weekdays" :key="weekday.short" scope="col">
@@ -26,7 +28,7 @@
         </thead>
         <tbody>
           <tr v-for="(week, weekIndex) in weeks" :key="weekIndex">
-            <td v-for="day in week" :key="day.date">
+            <td v-for="day in week" :key="day.key">
               <span
                 class="task-sidebar__day"
                 :class="{
@@ -49,7 +51,7 @@
       <div class="task-sidebar__current-list">
         <TaskIcon name="list" />
         <span>Мои задачи</span>
-        <span class="task-sidebar__count" aria-label="5 задач">5</span>
+        <span class="task-sidebar__count" :aria-label="`Всего задач: ${taskCount}`">{{ taskCount }}</span>
       </div>
     </section>
 
@@ -62,6 +64,20 @@
 
 <script setup lang="ts">
 import TaskIcon from '../TaskIcon/TaskIcon.vue';
+import { getLocalDate, parseTaskDate } from '~/utils/taskDate';
+
+const props = defineProps<{ taskCount: number; date: string }>();
+const calendarDate = computed(() => parseTaskDate(props.date));
+const monthLabel = computed(() => {
+  if (!calendarDate.value) return 'Календарь';
+  const label = calendarDate.value.toLocaleDateString('ru-RU', { month: 'long' });
+  return label.charAt(0).toLocaleUpperCase('ru-RU') + label.slice(1);
+});
+const calendarLabel = computed(() =>
+  calendarDate.value
+    ? `Календарь: ${calendarDate.value.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}`
+    : 'Календарь',
+);
 
 const weekdays = [
   { short: 'Пн', full: 'Понедельник' },
@@ -73,16 +89,32 @@ const weekdays = [
   { short: 'Вс', full: 'Воскресенье' },
 ];
 
-const days = Array.from({ length: 42 }, (_, index) => {
-  const day = index - 5;
-  const otherMonth = day < 1 || day > 30;
-  const label = day < 1 ? day + 31 : day > 30 ? day - 30 : day;
-  const month = day < 1 ? 'октября' : day > 30 ? 'декабря' : 'ноября';
+const days = computed(() => {
+  const selected = calendarDate.value;
+  const first = selected ? new Date(selected) : null;
+  first?.setDate(1);
+  const offset = first ? (first.getDay() + 6) % 7 : 0;
 
-  return { label, otherMonth, selected: day === 10, date: `${label} ${month} 2026 года` };
+  return Array.from({ length: 42 }, (_, index) => {
+    if (!first || !selected) {
+      return { key: `placeholder-${index}`, label: '', otherMonth: false, selected: false, date: undefined };
+    }
+
+    const date = new Date(first);
+    date.setDate(1 - offset + index);
+    const key = getLocalDate(date);
+
+    return {
+      key,
+      label: date.getDate(),
+      otherMonth: date.getMonth() !== selected.getMonth(),
+      selected: key === props.date,
+      date: date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }),
+    };
+  });
 });
 
-const weeks = Array.from({ length: 6 }, (_, index) => days.slice(index * 7, index * 7 + 7));
+const weeks = computed(() => Array.from({ length: 6 }, (_, index) => days.value.slice(index * 7, index * 7 + 7)));
 </script>
 
 <style lang="scss" scoped src="./style.scss"></style>

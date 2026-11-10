@@ -14,7 +14,7 @@
         :class="{ 'todo-shell__sidebar--open': isCalendarOpen }"
         aria-label="Обзор задач и календарь"
       >
-        <TaskSidebar />
+        <TaskSidebar :task-count="taskStore.tasks.length" :date="activeDate" />
       </aside>
 
       <main class="todo-main">
@@ -43,10 +43,9 @@
           <div class="todo-heading">
             <div>
               <h1 class="todo-heading__title">Мои задачи</h1>
-              <p class="todo-heading__date">Вторник, 10 ноября</p>
+              <p class="todo-heading__date">{{ dateLabel }}</p>
             </div>
             <div class="todo-heading__actions">
-              <span class="todo-heading__preview">Предпросмотр</span>
               <button
                 class="todo-heading__add"
                 type="button"
@@ -58,8 +57,14 @@
             </div>
           </div>
 
-          <TaskForm ref="taskForm" />
-          <TaskList class="todo-main__list" :items="previewTasks" />
+          <TaskForm ref="taskForm" :error="formError" :disabled="!activeDate" @add="addTask" />
+          <TaskList
+            ref="taskList"
+            class="todo-main__list"
+            :items="taskStore.tasks"
+            @set-completed="taskStore.setCompleted"
+            @remove="removeTask"
+          />
         </div>
 
         <footer class="todo-main__footer">
@@ -76,10 +81,52 @@ import TaskForm from '~/components/Tasks/TaskForm/TaskForm.vue';
 import TaskIcon from '~/components/Tasks/TaskIcon/TaskIcon.vue';
 import TaskList from '~/components/Tasks/TaskList/TaskList.vue';
 import TaskSidebar from '~/components/Tasks/TaskSidebar/TaskSidebar.vue';
+import { useTaskStore } from '~/stores/taskStore';
+import { TASK_TITLE_MAX_LENGTH } from '~/types/task';
+import { getLocalDate, parseTaskDate } from '~/utils/taskDate';
 
+const taskStore = useTaskStore();
+const activeDate = ref('');
+const formError = ref('');
 const isCalendarOpen = ref(false);
 const calendarButton = ref<HTMLButtonElement | null>(null);
 const taskForm = ref<InstanceType<typeof TaskForm> | null>(null);
+const taskList = ref<InstanceType<typeof TaskList> | null>(null);
+
+const dateLabel = computed(() => {
+  const date = parseTaskDate(activeDate.value);
+  if (!date) return 'Сегодня';
+
+  const label = date.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+  return label.charAt(0).toLocaleUpperCase('ru-RU') + label.slice(1);
+});
+
+onMounted(() => {
+  activeDate.value = getLocalDate();
+});
+
+function addTask(title: string) {
+  formError.value = '';
+  const task = taskStore.addTask(title, activeDate.value);
+
+  if (!task) {
+    formError.value = `Название должно содержать от 1 до ${TASK_TITLE_MAX_LENGTH} символов.`;
+    return;
+  }
+
+  taskForm.value?.reset();
+}
+
+async function removeTask(id: string) {
+  const index = taskStore.tasks.findIndex((task) => task.id === id);
+  if (index === -1) return;
+
+  const focusTarget = taskStore.tasks[index + 1] ?? taskStore.tasks[index - 1];
+  taskStore.removeTask(id);
+
+  if (focusTarget && (await taskList.value?.focusTask(focusTarget.id))) return;
+  taskForm.value?.focus();
+}
 
 function closeCalendar() {
   if (!isCalendarOpen.value) return;
@@ -91,14 +138,6 @@ function toggleCalendar() {
   if (isCalendarOpen.value) closeCalendar();
   else isCalendarOpen.value = true;
 }
-
-const previewTasks = [
-  { id: 'preview-1', title: 'Продумать главную страницу проекта', completed: false },
-  { id: 'preview-2', title: 'Собрать референсы для нового интерфейса', completed: false },
-  { id: 'preview-3', title: 'Запланировать задачи на неделю', completed: false },
-  { id: 'preview-4', title: 'Разобрать заметки после встречи', completed: true },
-  { id: 'preview-5', title: 'Подготовить рабочее пространство', completed: true },
-];
 
 useSeoMeta({
   title: 'Список задач',

@@ -329,15 +329,6 @@
     gap: vc(16);
   }
 
-  &__preview {
-    border-radius: vc(7);
-    padding: vc(5) vc(9);
-    font-size: vc(10);
-    line-height: 1.5;
-    color: var(--todo-muted);
-    background: #f3f5f6;
-  }
-
   &__add {
     display: grid;
     place-items: center;
@@ -371,12 +362,6 @@
       gap: vc(6);
     }
 
-    &__preview {
-      border-radius: vc(4);
-      padding: vc(3) vc(5);
-      font-size: vc(5);
-    }
-
     &__add {
       padding: vc(5);
       width: vc(21);
@@ -401,10 +386,6 @@
 
     &__actions {
       padding-top: vc(2);
-    }
-
-    &__preview {
-      display: none;
     }
   }
 }
